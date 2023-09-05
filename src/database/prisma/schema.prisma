@@ -44,13 +44,19 @@ enum CupidStatus {
   MATCH
 }
 
+enum CrushType {
+  ROGUE
+  ACTIVE
+}
+
 model Room {
   id String @id @default(uuid())
 
   creatorId String
   creator   User   @relation("RoomCreators", fields: [creatorId], references: [id])
 
-  crushId String
+  crushId   String
+  crushType CrushType
 
   creatorDisplayName String
   crushDisplayName   String
