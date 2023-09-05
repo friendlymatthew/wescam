@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { CreateRogueUserDto } from '../dto/create-rogue-user.dto';
 
-import { RogueUsersService } from '../rogue-users/rogue-users.service';
+import { RogueUsersService } from '../services/rogue-users.service';
 import { AbstractRogueUsers } from '../interfaces/abstract-rogue-users.interface';
 
 export interface RogueUsersControllerInterface extends AbstractRogueUsers {

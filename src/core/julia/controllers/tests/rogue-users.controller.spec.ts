@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RogueUsersController } from '../rogue-users.controller';
-import { RogueUsersService } from '../../rogue-users/rogue-users.service';
+import { RogueUsersService } from '../../services/rogue-users.service';
 
 describe('RogueUsersController', () => {
   let controller: RogueUsersController;

@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { CupidService } from './cupid.service';
+import { CupidService } from '../picafe/services/cupid.service';
 import { CreateCupidDto } from './dto/create-cupid.dto';
 import { UpdateCupidDto } from './dto/update-cupid.dto';
 

@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { CupidService } from './cupid.service';
+import { CupidService } from '../picafe/services/cupid.service';
 import { CupidController } from './cupid.controller';
 
 @Module({

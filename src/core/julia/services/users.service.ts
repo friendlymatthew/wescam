@@ -5,7 +5,7 @@ import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { ResponseWrapper } from 'src/core/wrappers/response-wrapper.model';
 import { ErrorResponseWrapper } from '../../wrappers/error-response-wrapper.model';
-import { RogueUsersService } from '../rogue-users/rogue-users.service';
+import { RogueUsersService } from './rogue-users.service';
 import { AbstractUsers } from '../interfaces/abstract-users.interface';
 
 export interface UsersServiceInterface extends AbstractUsers {

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PicafeGateway } from './picafe.gateway';
-import { PicafeService } from './picafe.service';
+import { PicafeService } from '../services/picafe.service';
 
 describe('PicafeGateway', () => {
   let gateway: PicafeGateway;

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { PicafeService } from './picafe.service';
-import { PicafeGateway } from './picafe.gateway';
+import { PicafeService } from '../services/picafe.service';
+import { PicafeGateway } from '../gateway/picafe.gateway';
 
 @Module({
   providers: [PicafeGateway, PicafeService],

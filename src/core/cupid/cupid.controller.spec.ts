@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CupidController } from './cupid.controller';
-import { CupidService } from './cupid.service';
+import { CupidService } from '../picafe/services/cupid.service';
 
 describe('CupidController', () => {
   let controller: CupidController;
