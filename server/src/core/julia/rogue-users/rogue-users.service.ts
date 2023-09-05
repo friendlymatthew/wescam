@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma/prisma.service';
 import { Prisma, RogueUser as PrismaRogueUser } from '@prisma/client';
-import { ResponseWrapper } from '../wrappers/response-wrapper.model';
-import { ErrorResponseWrapper } from '../wrappers/error-response-wrapper.model';
+import { ResponseWrapper } from '../../wrappers/response-wrapper.model';
+import { ErrorResponseWrapper } from '../../wrappers/error-response-wrapper.model';
 import { CreateRogueUserDto } from './dto/create-rogue-user.dto';
 import { AbstractRogueUsers } from './interfaces/abstract-rogue-users.interface';
 
