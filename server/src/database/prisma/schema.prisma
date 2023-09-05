@@ -49,15 +49,20 @@ model Room {
   guessStatus     GuessStatus @default(NOT_GUESSED)
   messages        Message[]
 
-  creator User @relation("CreatorRooms", fields: [creatorId], references: [id])
-  crush   User @relation("CrushRooms", fields: [crushId], references: [id])
+  creator     User       @relation("CreatorRooms", fields: [creatorId], references: [id])
+  crush       User       @relation("CrushRooms", fields: [crushId], references: [id])
+  RogueUser   RogueUser? @relation(fields: [rogueUserId], references: [id])
+  rogueUserId String?
+  RogueUser   RogueUser? @relation(fields: [rogueUserId], references: [id])
 
   @@unique([creatorId, crushId])
 }
 
 model RogueUser {
-  id    String @id @default(uuid())
-  email String @unique
+  id         String @id @default(uuid())
+  email      String @unique
+  crushRooms Room[] @relation("CrushRooms")
+  Room       Room[]
 
   @@index([email])
 }

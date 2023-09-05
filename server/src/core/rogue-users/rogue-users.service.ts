@@ -27,6 +27,11 @@ export class RogueUsersService implements RogueUsersInterface {
     createRogueUserDto: CreateRogueUserDto,
   ): Promise<PrismaRogueUser> {
     const { email } = createRogueUserDto;
+
+    if (await this.isRogueUser(email)) {
+      return;
+    }
+
     const newRogueUser: Prisma.RogueUserCreateInput = {
       email,
     };

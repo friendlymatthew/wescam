@@ -10,7 +10,7 @@ export interface RogueUsersControllerInterface extends AbstractRogueUsers {
   removeRogueUser(email: string): Promise<any>;
 }
 
-@Controller('Rogue-users')
+@Controller('rogue-users')
 export class RogueUsersController implements RogueUsersControllerInterface {
   constructor(private readonly rogueUsersService: RogueUsersService) {}
 
