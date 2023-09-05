@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { UsersModule } from './modules/users.module';
-import { RogueUsersModule } from './modules/rogue-users.module';
+import { UsersModule } from './users.module';
+import { RogueUsersModule } from './rogue-users.module';
 
 @Module({
   imports: [UsersModule, RogueUsersModule],

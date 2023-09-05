@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppService } from './app.service';
-import { JuliaModule } from './core/julia/julia.module';
+import { JuliaModule } from './core/julia/modules/julia.module';
 
 @Module({
   imports: [JuliaModule],
