@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+enum ContentType {
+  TEXT
+  GIF
+}
+
+enum GuessStatus {
+  NOT_GUESSED
+  CORRECT_GUESS
+  WRONG_GUESS
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Message {
+  id          String      @id @default(uuid())
+  senderId    String
+  roomId      String
+  content     String
+  contentType ContentType
+  timestamp   DateTime    @default(now())
+  sender      User        @relation(fields: [senderId], references: [id])
+  room        Room        @relation(fields: [roomId], references: [id])
+
+  @@index([roomId, senderId])
+}
+
+enum RoomType {
+  ROGUE
+  ACTIVE
+}
+
+enum CupidStatus {
+  GUESS
+  MATCH
+}
+
+model Room {
+  id String @id @default(uuid())
+
+  creatorId String
+  creator   User   @relation("RoomCreators", fields: [creatorId], references: [id])
+
+  crushId String
+
+  creatorDisplayName String
+  crushDisplayName   String
+
+  messages Message[]
+
+  type        RoomType
+  cupidStatus CupidStatus
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RogueUser {
+  id    String @id @default(uuid())
+  email String @unique
+
+  @@index([email])
+}
+
+model User {
+  id        String @id @default(uuid())
+  name      String
+  email     String @unique
+  pronoun   String
+  classYear Int
+
+  createdRooms Room[]    @relation("RoomCreators")
+  sentMessages Message[]
+}
