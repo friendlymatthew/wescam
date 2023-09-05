@@ -4,8 +4,9 @@ import { Prisma, RogueUser as PrismaRogueUser } from '@prisma/client';
 import { ResponseWrapper } from '../wrappers/response-wrapper.model';
 import { ErrorResponseWrapper } from '../wrappers/error-response-wrapper.model';
 import { CreateRogueUserDto } from './dto/create-rogue-user.dto';
+import { AbstractRogueUsers } from './interfaces/abstract-rogue-users.interface';
 
-export interface RogueUsersInterface {
+export interface RogueUsersInterface extends AbstractRogueUsers {
   /* if crush not User, create Rogue User */
   createRogueUser(
     createRogueUserDto: CreateRogueUserDto,

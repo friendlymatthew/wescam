@@ -10,33 +10,42 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AbstractUsers } from './interfaces/abstract-users.interface';
+import { User as PrismaUser } from '@prisma/client';
+export interface UsersControllerInterface extends AbstractUsers {
+  createUser(createUserDto: CreateUserDto): Promise<any>;
+  getAllUsers(): Promise<PrismaUser[]>;
+  getUser(id: string): Promise<PrismaUser>;
+  updateUser(id: string, updateUserDto: UpdateUserDto): Promise<PrismaUser>;
+  deleteUser(id: string): Promise<void>;
+}
 
 @Controller('users')
-export class UsersController {
+export class UsersController implements UsersControllerInterface {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  createUser(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.createUser(createUserDto);
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  getAllUsers() {
+    return this.usersService.getAllUsers();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  getUser(@Param('id') id: string) {
+    return this.usersService.getUser(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
+  updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.updateUser(id, updateUserDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
+  deleteUser(@Param('id') id: string) {
+    return this.usersService.deleteUser(id);
   }
 }

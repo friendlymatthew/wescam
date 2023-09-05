@@ -1,46 +1,31 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { CreateRogueUserDto } from './dto/create-rogue-user.dto';
-import { UpdateRogueUserDto } from './dto/update-rogue-user.dto';
 
 import { RogueUsersService } from './rogue-users.service';
+import { AbstractRogueUsers } from './interfaces/abstract-rogue-users.interface';
+
+export interface RogueUsersControllerInterface extends AbstractRogueUsers {
+  createRogueUser(createRogueUserDto: CreateRogueUserDto): Promise<any>;
+  isRogueUser(email: string): Promise<any>;
+  removeRogueUser(email: string): Promise<any>;
+}
 
 @Controller('Rogue-users')
-export class RogueUsersController {
-  constructor(private readonly RogueUsersService: RogueUsersService) {}
+export class RogueUsersController implements RogueUsersControllerInterface {
+  constructor(private readonly rogueUsersService: RogueUsersService) {}
 
   @Post()
-  create(@Body() createRogueUserDto: CreateRogueUserDto) {
-    return this.RogueUsersService.create(createRogueUserDto);
+  createRogueUser(@Body() createRogueUserDto: CreateRogueUserDto) {
+    return this.rogueUsersService.createRogueUser(createRogueUserDto);
   }
 
-  @Get()
-  findAll() {
-    return this.RogueUsersService.findAll();
+  @Get(':email')
+  isRogueUser(@Param('email') email: string) {
+    return this.rogueUsersService.isRogueUser(email);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.RogueUsersService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateRogueUserDto: UpdateRogueUserDto,
-  ) {
-    return this.RogueUsersService.update(+id, updateRogueUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.RogueUsersService.remove(+id);
+  @Delete(':email')
+  removeRogueUser(@Param('email') email: string) {
+    return this.rogueUsersService.removeRogueUser(email);
   }
 }

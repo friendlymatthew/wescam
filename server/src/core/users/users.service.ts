@@ -6,22 +6,20 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ResponseWrapper } from 'src/core/wrappers/response-wrapper.model';
 import { ErrorResponseWrapper } from '../wrappers/error-response-wrapper.model';
 import { RogueUsersService } from '../rogue-users/rogue-users.service';
+import { AbstractUsers } from './interfaces/abstract-users.interface';
 
-export interface UsersInterface {
-  /* onboarding users, we query for rogue user here*/
+export interface UsersServiceInterface extends AbstractUsers {
   createUser(
     createUserDto: CreateUserDto,
   ): Promise<ResponseWrapper<PrismaUser>>;
-
+  getAllUsers(): Promise<PrismaUser[]>;
   getUser(id: string): Promise<PrismaUser>;
-
   deleteUser(id: string): Promise<void>;
-
   updateUser(id: string, updateUserDto: UpdateUserDto): Promise<PrismaUser>;
 }
 
 @Injectable()
-export class UsersService implements UsersInterface {
+export class UsersService implements UsersServiceInterface {
   constructor(
     private readonly prisma: PrismaService,
     private readonly rogueUsersService: RogueUsersService,
@@ -67,7 +65,7 @@ export class UsersService implements UsersInterface {
     return user;
   }
 
-  async findAll(): Promise<PrismaUser[]> {
+  async getAllUsers(): Promise<PrismaUser[]> {
     return await this.prisma.user.findMany();
   }
 
