@@ -1,0 +1,10 @@
+{
+    "type": "postgres",
+    "url": "postgresql://mostvaluableship:friendship@localhost:5432/messageDb?schema=public",
+    "entities": ["dist/**/*.entity.js"],
+    "migrations": ["dist/migrations/*.js"],
+    "cli": {
+      "migrationsDir": "prisma/migrations"
+    }
+  }
+  
