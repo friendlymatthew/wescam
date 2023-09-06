@@ -9,21 +9,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RogueUser = void 0;
-const typeorm_1 = require("typeorm");
-let RogueUser = class RogueUser {
+exports.RogueUserType = void 0;
+const graphql_1 = require("@nestjs/graphql");
+let RogueUserType = class RogueUserType {
 };
-exports.RogueUser = RogueUser;
+exports.RogueUserType = RogueUserType;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
-], RogueUser.prototype, "id", void 0);
+], RogueUserType.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ unique: true }),
+    (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
-], RogueUser.prototype, "email", void 0);
-exports.RogueUser = RogueUser = __decorate([
-    (0, typeorm_1.Entity)(),
-    (0, typeorm_1.Unique)(['email'])
-], RogueUser);
+], RogueUserType.prototype, "email", void 0);
+exports.RogueUserType = RogueUserType = __decorate([
+    (0, graphql_1.ObjectType)()
+], RogueUserType);
 //# sourceMappingURL=rogue-user.entity.js.map

@@ -9,42 +9,37 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.User = exports.UserType = void 0;
-const typeorm_1 = require("typeorm");
-var UserType;
-(function (UserType) {
-    UserType["REGISTERED"] = "REGISTERED";
-    UserType["ROGUE"] = "ROGUE";
-})(UserType || (exports.UserType = UserType = {}));
-let User = class User {
+exports.UserType = void 0;
+const graphql_1 = require("@nestjs/graphql");
+const room_entity_1 = require("./room.entity");
+let UserType = class UserType {
 };
-exports.User = User;
+exports.UserType = UserType;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)('uuid'),
+    (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
-], User.prototype, "id", void 0);
+], UserType.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
-], User.prototype, "name", void 0);
+], UserType.prototype, "name", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
-], User.prototype, "type", void 0);
+], UserType.prototype, "email", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ unique: true }),
+    (0, graphql_1.Field)(() => String),
     __metadata("design:type", String)
-], User.prototype, "email", void 0);
+], UserType.prototype, "pronouns", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
-], User.prototype, "pronoun", void 0);
-__decorate([
-    (0, typeorm_1.Column)(),
+    (0, graphql_1.Field)(() => Number),
     __metadata("design:type", Number)
-], User.prototype, "classYear", void 0);
-exports.User = User = __decorate([
-    (0, typeorm_1.Entity)(),
-    (0, typeorm_1.Unique)(['email'])
-], User);
+], UserType.prototype, "classYear", void 0);
+__decorate([
+    (0, graphql_1.Field)(() => [room_entity_1.RoomEntityType], { nullable: "itemsAndList" }),
+    __metadata("design:type", Array)
+], UserType.prototype, "createdRooms", void 0);
+exports.UserType = UserType = __decorate([
+    (0, graphql_1.ObjectType)()
+], UserType);
 //# sourceMappingURL=user.entity.js.map

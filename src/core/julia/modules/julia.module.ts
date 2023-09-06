@@ -1,9 +1,8 @@
-import { Module } from '@nestjs/common';
-import { UsersModule } from './users.module';
-import { RogueUsersModule } from './rogue-users.module';
+import { Global, Module } from "@nestjs/common";
+import { JuliaService } from "../service/julia.service";
 
+@Global()
 @Module({
-  imports: [UsersModule, RogueUsersModule],
-  exports: [UsersModule, RogueUsersModule],
+	providers: [JuliaService],
 })
 export class JuliaModule {}

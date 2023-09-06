@@ -1,11 +1,10 @@
-import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { Field, ObjectType } from "@nestjs/graphql";
 
-@Entity()
-@Unique(['email'])
-export class RogueUser {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+@ObjectType()
+export class RogueUserType {
+	@Field(() => String)
+	id: string;
 
-  @Column({ unique: true })
-  email: string;
+	@Field(() => String)
+	email: string;
 }

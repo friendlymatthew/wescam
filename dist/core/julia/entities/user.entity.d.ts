@@ -1,12 +1,9 @@
-export declare enum UserType {
-    REGISTERED = "REGISTERED",
-    ROGUE = "ROGUE"
-}
-export declare class User {
+import { RoomEntityType } from "./room.entity";
+export declare class UserType {
     id: string;
     name: string;
-    type: UserType;
     email: string;
-    pronoun: string;
+    pronouns: string;
     classYear: number;
+    createdRooms?: RoomEntityType[];
 }

@@ -9,14 +9,28 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const app_service_1 = require("./app.service");
-const julia_module_1 = require("./core/julia/julia.module");
+const graphql_1 = require("@nestjs/graphql");
+const apollo_1 = require("@nestjs/apollo");
+const core_module_1 = require("./core/core.module");
+const graphql_type_json_1 = require("graphql-type-json");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [julia_module_1.JuliaModule],
-        controllers: [],
+        imports: [
+            graphql_1.GraphQLModule.forRoot({
+                driver: apollo_1.ApolloDriver,
+                autoSchemaFile: true,
+                resolvers: { JSON: graphql_type_json_1.default },
+                formatError: (error) => {
+                    error.extensions.stacktrace = undefined;
+                    return error;
+                },
+                csrfPrevention: false,
+            }),
+            core_module_1.CoreModule,
+        ],
         providers: [app_service_1.AppService],
     })
 ], AppModule);

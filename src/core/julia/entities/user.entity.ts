@@ -1,28 +1,23 @@
-import { Entity, Unique, Column, PrimaryGeneratedColumn } from 'typeorm';
-export enum UserType {
-  REGISTERED = 'REGISTERED',
-  ROGUE = 'ROGUE',
-}
+import { Field, ObjectType } from "@nestjs/graphql";
+import { RoomEntityType } from "./room.entity";
 
-// TODO: CONVERT TO NSQL
-@Entity()
-@Unique(['email'])
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+@ObjectType()
+export class UserType {
+	@Field(() => String)
+	id: string;
 
-  @Column()
-  name: string;
+	@Field(() => String)
+	name: string;
 
-  @Column()
-  type: UserType;
+	@Field(() => String)
+	email: string;
 
-  @Column({ unique: true })
-  email: string;
+	@Field(() => String)
+	pronouns: string;
 
-  @Column()
-  pronoun: string;
+	@Field(() => Number)
+	classYear: number;
 
-  @Column()
-  classYear: number;
+	@Field(() => [RoomEntityType], { nullable: "itemsAndList" })
+	createdRooms?: RoomEntityType[];
 }
