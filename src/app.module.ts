@@ -8,6 +8,7 @@ import { GraphQLError } from "graphql";
 import { AppResolver } from "./app.resolver";
 import { HolidayInnResolver } from "./core/julia/resolvers/holidayinn.resolvers";
 import { EntityResolver } from "./core/julia/resolvers/entity.resolvers";
+import { ScyllaModule } from "./core/picafe/scylla/scylla.module";
 
 @Module({
 	imports: [
@@ -16,6 +17,7 @@ import { EntityResolver } from "./core/julia/resolvers/entity.resolvers";
 			autoSchemaFile: true,
 		}),
 		CoreModule,
+		ScyllaModule,
 	],
 	providers: [AppResolver],
 })
