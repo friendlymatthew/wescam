@@ -12,12 +12,19 @@ const julia_module_1 = require("./julia/modules/julia.module");
 const prisma_module_1 = require("../database/prisma/prisma.module");
 const holidayinn_module_1 = require("./julia/modules/holidayinn.module");
 const entity_module_1 = require("./julia/modules/entity.module");
+const picafe_module_1 = require("./picafe/picafe.module");
 let CoreModule = class CoreModule {
 };
 exports.CoreModule = CoreModule;
 exports.CoreModule = CoreModule = __decorate([
     (0, common_1.Module)({
-        imports: [julia_module_1.JuliaModule, prisma_module_1.PrismaModule, holidayinn_module_1.HolidayInnModule, entity_module_1.EntityModule],
+        imports: [
+            julia_module_1.JuliaModule,
+            prisma_module_1.PrismaModule,
+            holidayinn_module_1.HolidayInnModule,
+            entity_module_1.EntityModule,
+            picafe_module_1.PicafeModule,
+        ],
         exports: [julia_module_1.JuliaModule, prisma_module_1.PrismaModule, holidayinn_module_1.HolidayInnModule, entity_module_1.EntityModule],
     })
 ], CoreModule);
