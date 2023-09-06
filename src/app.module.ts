@@ -17,7 +17,6 @@ import { ScyllaModule } from "./core/picafe/scylla/scylla.module";
 			autoSchemaFile: true,
 		}),
 		CoreModule,
-		ScyllaModule,
 	],
 	providers: [AppResolver],
 })
