@@ -1,8 +1,7 @@
-import { Args, Mutation, Resolver } from "@nestjs/graphql";
+import { Args, Mutation, Resolver, Query } from "@nestjs/graphql";
 import { HolidayInnService } from "../service/holidayinn.service";
 import { PrismaClient, Room as PrismaRoom, RoomType } from "@prisma/client";
 import { CreateRoomInput } from "../dto/create-room.input";
-import { Query } from "@nestjs/common";
 import { RoomEntityType } from "../entities/room.entity";
 
 @Resolver(() => RoomEntityType)

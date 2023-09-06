@@ -16,7 +16,6 @@ exports.HolidayInnResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const holidayinn_service_1 = require("../service/holidayinn.service");
 const create_room_input_1 = require("../dto/create-room.input");
-const common_1 = require("@nestjs/common");
 const room_entity_1 = require("../entities/room.entity");
 let HolidayInnResolver = class HolidayInnResolver {
     constructor(holidayInnService) {
@@ -39,7 +38,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], HolidayInnResolver.prototype, "createOrUpdateRoom", null);
 __decorate([
-    (0, common_1.Query)(() => [room_entity_1.RoomEntityType]),
+    (0, graphql_1.Query)(() => [room_entity_1.RoomEntityType]),
     __param(0, (0, graphql_1.Args)("id")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

@@ -16,6 +16,7 @@ exports.JuliaModule = JuliaModule = __decorate([
     (0, common_1.Global)(),
     (0, common_1.Module)({
         providers: [julia_service_1.JuliaService],
+        exports: [julia_service_1.JuliaService],
     })
 ], JuliaModule);
 //# sourceMappingURL=julia.module.js.map

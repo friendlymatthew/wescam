@@ -1,6 +1,9 @@
 import { Field, ObjectType, registerEnumType } from "@nestjs/graphql";
 import { MatchStatus, RoomType } from "@prisma/client";
 
+registerEnumType(RoomType, { name: "RoomType" });
+registerEnumType(MatchStatus, { name: "MatchStatus" });
+
 @ObjectType()
 export class RoomEntityType {
 	@Field(() => String)
