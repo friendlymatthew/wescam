@@ -12,7 +12,7 @@ const julia_module_1 = require("./julia/modules/julia.module");
 const prisma_module_1 = require("../database/prisma/prisma.module");
 const holidayinn_module_1 = require("./julia/modules/holidayinn.module");
 const entity_module_1 = require("./julia/modules/entity.module");
-const picafe_module_1 = require("./picafe/picafe.module");
+const picafe_module_1 = require("./picafe/modules/picafe.module");
 let CoreModule = class CoreModule {
 };
 exports.CoreModule = CoreModule;
@@ -25,7 +25,13 @@ exports.CoreModule = CoreModule = __decorate([
             entity_module_1.EntityModule,
             picafe_module_1.PicafeModule,
         ],
-        exports: [julia_module_1.JuliaModule, prisma_module_1.PrismaModule, holidayinn_module_1.HolidayInnModule, entity_module_1.EntityModule],
+        exports: [
+            julia_module_1.JuliaModule,
+            prisma_module_1.PrismaModule,
+            holidayinn_module_1.HolidayInnModule,
+            entity_module_1.EntityModule,
+            picafe_module_1.PicafeModule,
+        ],
     })
 ], CoreModule);
 //# sourceMappingURL=core.module.js.map

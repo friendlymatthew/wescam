@@ -11,62 +11,35 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var PicafeService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PicafeService = void 0;
 const common_1 = require("@nestjs/common");
-const cassandra_driver_1 = require("cassandra-driver");
-let PicafeService = class PicafeService {
-    constructor(cassandraClient) {
-        this.cassandraClient = cassandraClient;
+const pulsar_client_1 = require("pulsar-client");
+let PicafeService = PicafeService_1 = class PicafeService {
+    constructor(miguelProducer) {
+        this.miguelProducer = miguelProducer;
+        this.logger = new common_1.Logger(PicafeService_1.name);
     }
     async createMessage(message) {
-        const query = `
-    INSERT INTO messages (message_id, room_id, sender_id, content, timestamp, medialink)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `;
-        const params = [
-            message.message_id,
-            message.room_id,
-            message.sender_id,
-            message.content,
-            message.timestamp,
-            message.medialink,
-        ];
         try {
-            await this.cassandraClient.execute(query, params, { prepare: true });
+            const messageData = Buffer.from(JSON.stringify(message));
+            const producerMessage = {
+                data: messageData,
+                partitionKey: message.room_id.toString(),
+            };
+            await this.miguelProducer.send(producerMessage);
         }
         catch (error) {
-            throw new Error(`Failed to create a message: ${error.message}`);
-        }
-    }
-    async getMessagesByRoom(roomId) {
-        const query = `
-      SELECT * FROM messages
-      WHERE room_id = ?
-    `;
-        try {
-            const result = await this.cassandraClient.execute(query, [roomId], {
-                prepare: true,
-            });
-            const messages = result.rows.map((row) => ({
-                message_id: row.message_id,
-                room_id: row.room_id,
-                sender_id: row.sender_id,
-                content: row.content,
-                timestamp: row.timestamp,
-                medialink: row.medialink,
-            }));
-            return messages;
-        }
-        catch (error) {
-            throw new Error(`Failed to fetch messages: ${error.message}`);
+            this.logger.error(`Failed to create message: ${error.message}`);
+            throw new Error("Failed to create message");
         }
     }
 };
 exports.PicafeService = PicafeService;
-exports.PicafeService = PicafeService = __decorate([
+exports.PicafeService = PicafeService = PicafeService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, common_1.Inject)("SCYLLA_CLIENT")),
-    __metadata("design:paramtypes", [cassandra_driver_1.Client])
+    __param(0, (0, common_1.Inject)("MIGUEL")),
+    __metadata("design:paramtypes", [pulsar_client_1.Producer])
 ], PicafeService);
 //# sourceMappingURL=picafe.service.js.map

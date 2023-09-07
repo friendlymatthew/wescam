@@ -3,39 +3,74 @@ import {
 	SubscribeMessage,
 	MessageBody,
 	ConnectedSocket,
+	OnGatewayInit,
+	OnGatewayConnection,
+	WebSocketServer,
 } from "@nestjs/websockets";
 import { PicafeService } from "../service/picafe.service";
+import { MiguelService } from "../service/miguel.service";
 import { Message } from "../entities/message.entities";
 import { Server, Socket } from "socket.io";
 import { types } from "cassandra-driver";
 
 @WebSocketGateway()
-export class PicafeGateway {
-	constructor(private readonly picafeService: PicafeService) {}
+export class PicafeGateway implements OnGatewayInit, OnGatewayConnection {
+	@WebSocketServer()
+	private server: Server;
+	constructor(
+		private readonly miguelService: MiguelService,
+		private readonly picafeService: PicafeService
+	) {}
 
-	@SubscribeMessage("createMessage")
-	async createMessage(
-		@MessageBody() message: Message,
-		@ConnectedSocket() socket: Socket
-	) {
+	afterInit() {
+		console.log("picafe gateway initalized");
+	}
+
+	handleConnection(client: Socket) {
+		console.log("client connected: ", client.id);
+	}
+
+	@SubscribeMessage("joinRoom")
+	async handleJoinRoom(client: Socket, roomId: types.Uuid): Promise<void> {
 		try {
-			await this.picafeService.createMessage(message);
-			socket.to("room123").emit("newMessage", message);
+			await this.miguelService.createConsumerForRoom(roomId.toString());
+			client.join(roomId.toString());
+			this.server
+				.to(roomId.toString())
+				.emit("user has joined", { userId: client.id, roomId });
 		} catch (error) {
-			console.error(error);
+			client.emit("error", "Failed to join room : " + error.message);
 		}
 	}
 
-	@SubscribeMessage("getMessagesByRoom")
-	async getMessagesByRoom(@MessageBody() roomIdString: string) {
+	@SubscribeMessage("leaveRoom")
+	async handleLeaveRoom(client: Socket, roomId: types.Uuid): Promise<void> {
 		// Corrected variable name
 		try {
-			const roomGuid: types.Uuid = types.Uuid.fromString(roomIdString); // Corrected variable name
-			const messages = await this.picafeService.getMessagesByRoom(roomGuid);
-			return messages;
+			await this.miguelService.closeoutConsumerForRoom(roomId.toString());
+			client.leave(roomId.toString());
+
+			this.server
+				.to(roomId.toString())
+				.emit("user has left", { userId: client.id, roomId });
 		} catch (error) {
-			console.error(error);
-			return [];
+			client.emit("error", "Failed to leave room : " + error.message);
+		}
+	}
+
+	@SubscribeMessage("sendMessage")
+	async handleSendMessage(
+		@MessageBody() message: Message,
+		@ConnectedSocket() client: Socket
+	): Promise<void> {
+		try {
+			const roomId = message.room_id;
+
+			await this.picafeService.createMessage(message);
+
+			this.server.to(roomId.toString()).emit("newMessage", message);
+		} catch (error) {
+			client.emit("error", "Failed to send message : " + error.message);
 		}
 	}
 }
