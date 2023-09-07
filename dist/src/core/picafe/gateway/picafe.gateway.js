@@ -64,6 +64,15 @@ let PicafeGateway = class PicafeGateway {
             client.emit("error", "Failed to send message : " + error.message);
         }
     }
+    async handleFetchAllMessages(client, roomId) {
+        try {
+            const messages = await this.miguelService.getMessagesByRoom(roomId);
+            client.emit("allMessages", messages);
+        }
+        catch (error) {
+            client.emit("error", "Failed to fetch all messages : " + error.message);
+        }
+    }
 };
 exports.PicafeGateway = PicafeGateway;
 __decorate([
@@ -91,6 +100,12 @@ __decorate([
         socket_io_1.Socket]),
     __metadata("design:returntype", Promise)
 ], PicafeGateway.prototype, "handleSendMessage", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)("fetchAllMessages"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, cassandra_driver_1.types.Uuid]),
+    __metadata("design:returntype", Promise)
+], PicafeGateway.prototype, "handleFetchAllMessages", null);
 exports.PicafeGateway = PicafeGateway = __decorate([
     (0, websockets_1.WebSocketGateway)(),
     __metadata("design:paramtypes", [miguel_service_1.MiguelService,

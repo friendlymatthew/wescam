@@ -14,4 +14,5 @@ export declare class PicafeGateway implements OnGatewayInit, OnGatewayConnection
     handleJoinRoom(client: Socket, roomId: types.Uuid): Promise<void>;
     handleLeaveRoom(client: Socket, roomId: types.Uuid): Promise<void>;
     handleSendMessage(message: Message, client: Socket): Promise<void>;
+    handleFetchAllMessages(client: Socket, roomId: types.Uuid): Promise<void>;
 }

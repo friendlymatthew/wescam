@@ -73,4 +73,17 @@ export class PicafeGateway implements OnGatewayInit, OnGatewayConnection {
 			client.emit("error", "Failed to send message : " + error.message);
 		}
 	}
+
+	@SubscribeMessage("fetchAllMessages")
+	async handleFetchAllMessages(
+		client: Socket,
+		roomId: types.Uuid
+	): Promise<void> {
+		try {
+			const messages = await this.miguelService.getMessagesByRoom(roomId);
+			client.emit("allMessages", messages);
+		} catch (error) {
+			client.emit("error", "Failed to fetch all messages : " + error.message);
+		}
+	}
 }

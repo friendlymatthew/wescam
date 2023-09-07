@@ -1462,13 +1462,6 @@
     "@types/node" "*"
     form-data "^3.0.0"
 
-"@types/node-zookeeper-client@^0.2.8":
-  version "0.2.8"
-  resolved "https://registry.yarnpkg.com/@types/node-zookeeper-client/-/node-zookeeper-client-0.2.8.tgz#e2e2caf48b19a0d0aaf5c4656940655a2528e516"
-  integrity sha512-aD0hyo2AEHW4ed0lKFTFEVfq2VJmwcYQxV2AP7uYs68/mDx0aZc9VNLdyWJBvWXA9eF/0z4BCVDKLi24QoNX9Q==
-  dependencies:
-    "@types/node" "*"
-
 "@types/node@*", "@types/node@>=10.0.0", "@types/node@>=8", "@types/node@^20.3.1":
   version "20.5.9"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-20.5.9.tgz#a70ec9d8fa0180a314c3ede0e20ea56ff71aed9a"
@@ -1970,11 +1963,6 @@ async-retry@^1.2.1:
   integrity sha512-wfr/jstw9xNi/0teMHrRW7dsz3Lt5ARhYNZ2ewpadnhaIp5mbALhOAP+EAdsC7t4Z6wqsDVv9+W6gm1Dk9mEyw==
   dependencies:
     retry "0.13.1"
-
-async@~3.2.3:
-  version "3.2.4"
-  resolved "https://registry.yarnpkg.com/async/-/async-3.2.4.tgz#2d22e00f8cddeb5fde5dd33522b56d1cf569a81c"
-  integrity sha512-iAB+JbDEGXhyIUavoDl9WP/Jj106Kz9DEn1DPgYw5ruDn0e3Wgi3sKFm55sASdGBNOQB8F59d9qQ7deqrHA8wQ==
 
 asynckit@^0.4.0:
   version "0.4.0"
@@ -4773,14 +4761,6 @@ node-releases@^2.0.13:
   resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-2.0.13.tgz#d5ed1627c23e3461e819b02e57b75e4899b1c81d"
   integrity sha512-uYr7J37ae/ORWdZeQ1xxMJe3NtdmqMC/JZK+geofDrkLUApKRHPd18/TxtBOJ4A0/+uUIliorNrfYV6s1b02eQ==
 
-node-zookeeper-client@^1.1.3:
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/node-zookeeper-client/-/node-zookeeper-client-1.1.3.tgz#a8f4740e861ffec93c297cc76fb30038e9cb099e"
-  integrity sha512-S7DWrIpr16E03LSTbiuahcHvE/Aj3AJEh2X7+bL8sx/PoR8YNwUQlVspX1QslkD5Pk9RsC8ZTMN2GapS8IrOYQ==
-  dependencies:
-    async "~3.2.3"
-    underscore "~1.13.3"
-
 nopt@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/nopt/-/nopt-5.0.0.tgz#530942bb58a512fccafe53fe210f13a25355dc88"
@@ -6082,11 +6062,6 @@ uid@2.0.2:
   integrity sha512-u3xV3X7uzvi5b1MncmZo3i2Aw222Zk1keqLA1YkHldREkAhAqi65wuPfe7lHx8H/Wzy+8CE7S7uS3jekIM5s8g==
   dependencies:
     "@lukeed/csprng" "^1.0.0"
-
-underscore@~1.13.3:
-  version "1.13.6"
-  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.13.6.tgz#04786a1f589dc6c09f761fc5f45b89e935136441"
-  integrity sha512-+A5Sja4HP1M08MaXya7p5LvjuM7K6q/2EaC0+iovj/wOcMsTzMvDFbasi/oSapiwOlt252IqsKqPjCl7huKS0A==
 
 universalify@^2.0.0:
   version "2.0.0"
