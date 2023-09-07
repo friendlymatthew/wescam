@@ -1,19 +1,45 @@
 <p align="center">
-  <img src="./xyz_logo.png" width="200" alt="XYZ Logo" /></a>
+  <img src="./xyz_logo.png" width="200" alt="XYZ Logo">
 </p>
+
+# XYZ: Real-time Encrypted Messaging Service
+
+[![Join Discord](https://img.shields.io/badge/Discord-Join%20Server-blue?style=for-the-badge&logo=discord)](https://discord.gg/gt8VTZfn6h)
+
+---
+
+## Table of Contents
+
+- [Description](#description)
+- [Environment Setup](#environment-setup)
+  - [Node and Yarn](#node-and-yarn)
+  - [NestJS](#nestjs)
+  - [Prisma](#prisma)
+  - [PostgreSQL](#postgresql)
+- [Installation](#installation)
+- [Running the App](#running-the-app)
+- [Test](#test)
+- [Acknowledgements](#acknowledgements)
+
+---
 
 ## Description
 
-This repository contains the code for XYZ, a server-side real-time encrypted messaging service. 
+This repository contains the code for XYZ, a server-side real-time encrypted messaging service built using NestJS, Prisma ORM, and PostgreSQL.
 
-## Enviornment Setup
+---
 
-Before beginning the process for setting up the project, there are several dependencies you must download. Firstly, you must have Node and yarn installed on your system. 
+## Environment Setup
 
-To install Node run the following commands:
+Before setting up the project, you need to install several dependencies:
+
+### Node and Yarn
+
+Firstly, ensure that Node.js and Yarn are installed on your system.
+
 ```bash
 brew install node
-npm install yarn 
+npm install yarn
 ```
 
 Notice that this step assumes that you have [Homebrew](linktohonebrew) setup on your device. If you don't have that installed, please look at their documentation to get that set up. 
