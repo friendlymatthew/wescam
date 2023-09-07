@@ -12,6 +12,7 @@ import { PicafeModule } from "./picafe/modules/picafe.module";
 		EntityModule,
 		PicafeModule,
 	],
+	providers: [],
 	exports: [
 		JuliaModule,
 		PrismaModule,
