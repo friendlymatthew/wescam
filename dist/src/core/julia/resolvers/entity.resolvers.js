@@ -14,23 +14,30 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EntityResolver = void 0;
 const graphql_1 = require("@nestjs/graphql");
+const entity_service_1 = require("../service/entity.service");
 const user_entity_1 = require("../entities/user.entity");
 const create_user_input_1 = require("../dto/create-user.input");
 const rogue_user_entity_1 = require("../entities/rogue-user.entity");
 const create_rogueuser_input_1 = require("../dto/create-rogueuser.input");
-class EntityResolver {
+let EntityResolver = class EntityResolver {
     constructor(entityService) {
         this.entityService = entityService;
     }
     async createUser(createUserInput) {
-        const user = await this.entityService.createUser(createUserInput);
-        return user;
+        try {
+            const user = await this.entityService.createUser(createUserInput);
+            return user;
+        }
+        catch (error) {
+            console.log(error);
+            throw new Error("Failed to create user");
+        }
     }
     async createRogueUser(createRogueUserInput) {
         const rogueUser = await this.entityService.createRogueUser(createRogueUserInput);
         return rogueUser;
     }
-}
+};
 exports.EntityResolver = EntityResolver;
 __decorate([
     (0, graphql_1.Mutation)(() => user_entity_1.UserType),
@@ -46,4 +53,8 @@ __decorate([
     __metadata("design:paramtypes", [create_rogueuser_input_1.CreateRogueUserInput]),
     __metadata("design:returntype", Promise)
 ], EntityResolver.prototype, "createRogueUser", null);
+exports.EntityResolver = EntityResolver = __decorate([
+    (0, graphql_1.Resolver)(() => user_entity_1.UserType),
+    __metadata("design:paramtypes", [entity_service_1.EntityService])
+], EntityResolver);
 //# sourceMappingURL=entity.resolvers.js.map

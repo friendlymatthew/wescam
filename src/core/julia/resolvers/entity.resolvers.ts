@@ -1,4 +1,4 @@
-import { Args, Mutation } from "@nestjs/graphql";
+import { Args, Mutation, Resolver } from "@nestjs/graphql";
 import { HolidayInnService } from "../service/holidayinn.service";
 import {
 	PrismaClient,
@@ -12,6 +12,7 @@ import { CreateUserInput } from "../dto/create-user.input";
 import { RogueUserType } from "../entities/rogue-user.entity";
 import { CreateRogueUserInput } from "../dto/create-rogueuser.input";
 
+@Resolver(() => UserType)
 export class EntityResolver {
 	constructor(private readonly entityService: EntityService) {}
 
@@ -19,9 +20,13 @@ export class EntityResolver {
 	async createUser(
 		@Args("createUserInput") createUserInput: CreateUserInput
 	): Promise<PrismaUser> {
-		const user = await this.entityService.createUser(createUserInput);
-
-		return user;
+		try {
+			const user = await this.entityService.createUser(createUserInput);
+			return user;
+		} catch (error) {
+			console.log(error);
+			throw new Error("Failed to create user");
+		}
 	}
 
 	@Mutation(() => RogueUserType)

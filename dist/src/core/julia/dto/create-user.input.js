@@ -34,7 +34,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateUserInput.prototype, "pronouns", void 0);
 __decorate([
-    (0, graphql_1.Field)(() => String, { description: "Class year of user" }),
+    (0, graphql_1.Field)(() => graphql_1.Int, { description: "Class year of user" }),
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", Number)
