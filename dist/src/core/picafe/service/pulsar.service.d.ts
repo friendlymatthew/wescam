@@ -8,14 +8,12 @@ export declare class PulsarService implements OnModuleInit {
     private roomConsumers;
     private roomMessageQueues;
     private readonly logger;
-    private readonly BATCH_SIZE;
-    private readonly QUEUE_FLUSH_INTERVAL_MS;
     constructor(pulsar: Client, cassandraClient: CassandraClient);
     onModuleInit(): Promise<void>;
+    get_X_MessagesByRoom(roomId: types.Uuid, x: number): Promise<Message[]>;
     getMessagesByRoom(roomId: types.Uuid): Promise<Message[]>;
-    private flushAllQueues;
-    private pushBatchToScylla;
-    createConsumerForRoom(roomId: string): Promise<void>;
+    pairConsumerToRoom(roomId: string): Promise<void>;
+    private writeMessageToDB;
     private listenToConsumer;
     closeoutConsumerForRoom(roomId: string): Promise<void>;
 }

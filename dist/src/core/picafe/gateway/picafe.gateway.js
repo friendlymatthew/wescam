@@ -11,29 +11,29 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var PicafeGateway_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PicafeGateway = void 0;
 const websockets_1 = require("@nestjs/websockets");
 const picafe_service_1 = require("../service/picafe.service");
-const pulsar_service_1 = require("../service/pulsar.service");
 const message_entities_1 = require("../entities/message.entities");
 const socket_io_1 = require("socket.io");
 const cassandra_driver_1 = require("cassandra-driver");
-let PicafeGateway = class PicafeGateway {
-    constructor(miguelService, picafeService) {
-        this.miguelService = miguelService;
+const common_1 = require("@nestjs/common");
+let PicafeGateway = PicafeGateway_1 = class PicafeGateway {
+    constructor(picafeService) {
         this.picafeService = picafeService;
+        this.logger = new common_1.Logger(PicafeGateway_1.name);
     }
     afterInit() {
-        console.log("picafe gateway initalized");
+        this.logger.log("Gateway successfully initalized");
     }
     handleConnection(client) {
-        console.log("client connected: ", client.id);
+        this.logger.log(`Client connected: ${client.id}`);
     }
     async handleJoinRoom(client, roomId) {
         try {
-            await this.miguelService.createConsumerForRoom(roomId.toString());
-            client.join(roomId.toString());
+            await this.picafeService.joinRoom(roomId.toString(), client);
             this.server
                 .to(roomId.toString())
                 .emit("user has joined", { userId: client.id, roomId });
@@ -44,8 +44,7 @@ let PicafeGateway = class PicafeGateway {
     }
     async handleLeaveRoom(client, roomId) {
         try {
-            await this.miguelService.closeoutConsumerForRoom(roomId.toString());
-            client.leave(roomId.toString());
+            await this.picafeService.leaveRoom(roomId.toString(), client);
             this.server
                 .to(roomId.toString())
                 .emit("user has left", { userId: client.id, roomId });
@@ -66,8 +65,7 @@ let PicafeGateway = class PicafeGateway {
     }
     async handleFetchAllMessages(client, roomId) {
         try {
-            const messages = await this.miguelService.getMessagesByRoom(roomId);
-            client.emit("allMessages", messages);
+            await this.picafeService.getAllMessages(roomId);
         }
         catch (error) {
             client.emit("error", "Failed to fetch all messages : " + error.message);
@@ -106,9 +104,8 @@ __decorate([
     __metadata("design:paramtypes", [socket_io_1.Socket, cassandra_driver_1.types.Uuid]),
     __metadata("design:returntype", Promise)
 ], PicafeGateway.prototype, "handleFetchAllMessages", null);
-exports.PicafeGateway = PicafeGateway = __decorate([
+exports.PicafeGateway = PicafeGateway = PicafeGateway_1 = __decorate([
     (0, websockets_1.WebSocketGateway)(),
-    __metadata("design:paramtypes", [pulsar_service_1.PulsarService,
-        picafe_service_1.PicafeService])
+    __metadata("design:paramtypes", [picafe_service_1.PicafeService])
 ], PicafeGateway);
 //# sourceMappingURL=picafe.gateway.js.map
