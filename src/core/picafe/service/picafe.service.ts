@@ -13,9 +13,10 @@ export class PicafeService implements PicafeServiceInterface {
 
 	async createMessage(message: Message): Promise<void> {
 		try {
-			this.sendMessageToProducer(message);
+			await this.sendMessageToProducer(message);
 		} catch (error) {
 			this.handleMessageFailure(error);
+			throw error;
 		}
 	}
 
