@@ -12,6 +12,7 @@ const graphql_1 = require("@nestjs/graphql");
 const apollo_1 = require("@nestjs/apollo");
 const core_module_1 = require("./core/core.module");
 const app_resolver_1 = require("./app.resolver");
+const config_1 = require("@nestjs/config");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -22,6 +23,7 @@ exports.AppModule = AppModule = __decorate([
                 driver: apollo_1.ApolloDriver,
                 autoSchemaFile: true,
             }),
+            config_1.ConfigModule.forRoot(),
             core_module_1.CoreModule,
         ],
         providers: [app_resolver_1.AppResolver],

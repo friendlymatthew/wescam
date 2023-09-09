@@ -8,7 +8,7 @@ import {
 	WebSocketServer,
 } from "@nestjs/websockets";
 import { PicafeService } from "../service/picafe.service";
-import { MiguelService } from "../service/miguel.service";
+import { PulsarService } from "../service/pulsar.service";
 import { Message } from "../entities/message.entities";
 import { Server, Socket } from "socket.io";
 import { types } from "cassandra-driver";
@@ -16,9 +16,9 @@ import { types } from "cassandra-driver";
 @WebSocketGateway()
 export class PicafeGateway implements OnGatewayInit, OnGatewayConnection {
 	@WebSocketServer()
-	private server: Server;
+	public server: Server;
 	constructor(
-		private readonly miguelService: MiguelService,
+		private readonly miguelService: PulsarService,
 		private readonly picafeService: PicafeService
 	) {}
 
@@ -65,9 +65,7 @@ export class PicafeGateway implements OnGatewayInit, OnGatewayConnection {
 	): Promise<void> {
 		try {
 			const roomId = message.room_id;
-
 			await this.picafeService.createMessage(message);
-
 			this.server.to(roomId.toString()).emit("newMessage", message);
 		} catch (error) {
 			client.emit("error", "Failed to send message : " + error.message);

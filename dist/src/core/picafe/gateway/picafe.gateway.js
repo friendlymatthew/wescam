@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PicafeGateway = void 0;
 const websockets_1 = require("@nestjs/websockets");
 const picafe_service_1 = require("../service/picafe.service");
-const miguel_service_1 = require("../service/miguel.service");
+const pulsar_service_1 = require("../service/pulsar.service");
 const message_entities_1 = require("../entities/message.entities");
 const socket_io_1 = require("socket.io");
 const cassandra_driver_1 = require("cassandra-driver");
@@ -108,7 +108,7 @@ __decorate([
 ], PicafeGateway.prototype, "handleFetchAllMessages", null);
 exports.PicafeGateway = PicafeGateway = __decorate([
     (0, websockets_1.WebSocketGateway)(),
-    __metadata("design:paramtypes", [miguel_service_1.MiguelService,
+    __metadata("design:paramtypes", [pulsar_service_1.PulsarService,
         picafe_service_1.PicafeService])
 ], PicafeGateway);
 //# sourceMappingURL=picafe.gateway.js.map
