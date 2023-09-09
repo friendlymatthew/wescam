@@ -4,7 +4,6 @@ import { Message } from "../entities/message.entities";
 import { PicafeService } from "./picafe.service";
 import { types, Client as CassandraClient } from "cassandra-driver";
 
-export interface MigeulServiceInterface {}
 
 @Injectable()
 export class MiguelService implements OnModuleInit {
