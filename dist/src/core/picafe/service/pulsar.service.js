@@ -24,11 +24,35 @@ let PulsarService = PulsarService_1 = class PulsarService {
         this.roomConsumers = {};
         this.roomMessageQueues = {};
         this.logger = new common_1.Logger(PulsarService_1.name);
-        this.BATCH_SIZE = 10;
-        this.QUEUE_FLUSH_INTERVAL_MS = 1000;
     }
-    async onModuleInit() {
-        setInterval(() => this.flushAllQueues(), this.QUEUE_FLUSH_INTERVAL_MS);
+    async onModuleInit() { }
+    async get_X_MessagesByRoom(roomId, x) {
+        if (x <= 0) {
+            throw new Error("x must be greater than 0");
+        }
+        const query = `
+	  SELECT * FROM messages
+	  WHERE room_id = ?
+	  ORDER BY timestamp DESC
+	  LIMIT ${x.toString()}
+	`;
+        try {
+            const result = await this.cassandraClient.execute(query, [roomId], {
+                prepare: true,
+            });
+            const messages = result.rows.map((row) => ({
+                message_id: row.message_id,
+                room_id: row.room_id,
+                sender_id: row.sender_id,
+                content: row.content,
+                timestamp: row.timestamp,
+                medialink: row.medialink,
+            }));
+            return messages;
+        }
+        catch (error) {
+            throw new Error(`Failed to fetch messages: ${error.message}`);
+        }
     }
     async getMessagesByRoom(roomId) {
         const query = `
@@ -54,36 +78,7 @@ let PulsarService = PulsarService_1 = class PulsarService {
             throw new Error(`Failed to fetch messages: ${error.message}`);
         }
     }
-    flushAllQueues() {
-        for (const roomId in this.roomMessageQueues) {
-            const queue = this.roomMessageQueues[roomId];
-            if (queue.length >= this.BATCH_SIZE) {
-                this.pushBatchToScylla(roomId, queue.splice(0, this.BATCH_SIZE));
-            }
-        }
-    }
-    async pushBatchToScylla(roomId, messageBatch) {
-        let batchQuery = "BEGIN BATCH\n";
-        const params = [];
-        messageBatch.forEach((message, index) => {
-            const placeholderArray = new Array(6).fill(null).map((_, i) => `?`);
-            const placeholders = placeholderArray.join(", ");
-            batchQuery += `
-				INSERT INTO messages (message_id, room_id, sender_id, content, timestamp, medialink)
-				VALUES (${placeholders});
-			`;
-            params.push(message.message_id, message.room_id, message.sender_id, message.content, message.timestamp, message.medialink);
-        });
-        batchQuery += "APPLY BATCH;";
-        try {
-            await this.cassandraClient.execute(batchQuery, params, { prepare: true });
-            this.logger.log(`Successfully pushed batch to ScyllaDB for room ${roomId}`);
-        }
-        catch (error) {
-            this.logger.error(`Failed to push batch to ScyllaDB: ${error.message}`);
-        }
-    }
-    async createConsumerForRoom(roomId) {
+    async pairConsumerToRoom(roomId) {
         if (this.roomConsumers[roomId]) {
             this.logger.log(`Consumer for room ${roomId} already exists.`);
             this.listenToConsumer(this.roomConsumers[roomId], roomId);
@@ -98,14 +93,32 @@ let PulsarService = PulsarService_1 = class PulsarService {
         this.roomMessageQueues[roomId] = [];
         this.listenToConsumer(consumer, roomId);
     }
+    async writeMessageToDB(message) {
+        const query = `
+			INSERT INTO messages (message_id, room_id, sender_id, content, timestamp, medialink)
+			VALUES (?, ?, ?, ?, ?, ?)
+		`;
+        const params = [
+            message.message_id,
+            message.room_id,
+            message.sender_id,
+            message.content,
+            message.timestamp,
+            message.medialink,
+        ];
+        try {
+            await this.cassandraClient.execute(query, params, { prepare: true });
+            this.logger.log(`Successfully pushed batch to ScyllaDB for room ${message.room_id}`);
+        }
+        catch (error) {
+            this.logger.error(`Failed to push batch to ScyllaDB: ${error.message}`);
+        }
+    }
     async listenToConsumer(consumer, roomId) {
         while (true) {
             const msg = await consumer.receive();
             const messageData = JSON.parse(msg.getData().toString());
-            this.roomMessageQueues[roomId].push(messageData);
-            if (this.roomMessageQueues[roomId].length >= this.BATCH_SIZE) {
-                this.pushBatchToScylla(roomId, this.roomMessageQueues[roomId].splice(0, this.BATCH_SIZE));
-            }
+            this.writeMessageToDB(messageData);
             consumer.acknowledge(msg);
         }
     }
