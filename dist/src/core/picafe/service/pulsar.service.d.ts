@@ -2,17 +2,20 @@ import { OnModuleInit } from "@nestjs/common";
 import { Client } from "pulsar-client";
 import { Message } from "../entities/message.entities";
 import { types, Client as CassandraClient } from "cassandra-driver";
-export interface MigeulServiceInterface {
-}
-export declare class MiguelService implements OnModuleInit {
-    private readonly miguel;
+export declare class PulsarService implements OnModuleInit {
+    private readonly pulsar;
     private readonly cassandraClient;
     private roomConsumers;
-    constructor(miguel: Client, cassandraClient: CassandraClient);
+    private roomMessageQueues;
+    private readonly logger;
+    private readonly BATCH_SIZE;
+    private readonly QUEUE_FLUSH_INTERVAL_MS;
+    constructor(pulsar: Client, cassandraClient: CassandraClient);
     onModuleInit(): Promise<void>;
     getMessagesByRoom(roomId: types.Uuid): Promise<Message[]>;
+    private flushAllQueues;
+    private pushBatchToScylla;
     createConsumerForRoom(roomId: string): Promise<void>;
     private listenToConsumer;
-    private pushToScylla;
     closeoutConsumerForRoom(roomId: string): Promise<void>;
 }

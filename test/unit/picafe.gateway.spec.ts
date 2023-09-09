@@ -3,58 +3,47 @@ import { PicafeGateway } from "../../src/core/picafe/gateway/picafe.gateway";
 import { PicafeService } from "../../src/core/picafe/service/picafe.service";
 import { types } from "cassandra-driver";
 import { Message } from "src/core/picafe/entities/message.entities";
-import { Server, Socket } from "socket.io";
-import { MiguelService } from "src/core/picafe/service/miguel.service";
+import { Server, Socket as IOSocket } from "socket.io";
+import { PulsarService } from "src/core/picafe/service/pulsar.service";
 
-jest.mock("socket.io");
 jest.mock("../../src/core/picafe/service/miguel.service");
 jest.mock("../../src/core/picafe/service/picafe.service");
 
 describe("PicafeGateway", () => {
 	let gateway: PicafeGateway;
-	let mockMiguelService: jest.Mocked<MiguelService>;
+	let mockMiguelService: jest.Mocked<PulsarService>;
 	let mockPicafeService: jest.Mocked<PicafeService>;
-	let mockSocket: jest.Mocked<Socket>;
-	let mockServer: jest.Mocked<Server>;
-	/*
+	let mockSocket: Partial<IOSocket>;
+	let mockServer: Partial<Server>;
+
 	beforeEach(async () => {
-		mockSocket = new Socket() as jest.Mocked<Socket>;
-		mockServer = new Server() as jest.Mocked<Server>;
+		mockServer = {
+			to: jest.fn().mockReturnThis(),
+			emit: jest.fn(),
+		};
+
+		mockSocket = {
+			id: "socket-id",
+			join: jest.fn(),
+			leave: jest.fn(),
+			emit: jest.fn(),
+		};
 
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
 				PicafeGateway,
-				{
-					provide: MiguelService,
-					useValue: new MiguelServ c√fxcvb 'ice(),
-				},
-				{
-					provide: PicafeService,
-					useValue: new PicafeService(),
-				},
+				{ provide: PulsarService, useValue: {} },
+				{ provide: PicafeService, useValue: {} },
 			],
 		}).compile();
 
 		gateway = module.get<PicafeGateway>(PicafeGateway);
-		mockMiguelService = module.get(MiguelService);
-		mockPicafeService = module.get(PicafeService);
 
-		gateway.server = mockServer;
+		gateway.server = mockServer as Server;
 	});
 
+	// Basic test to ensure the gateway exists
 	it("should be defined", () => {
 		expect(gateway).toBeDefined();
 	});
-
-	it("should handle join room successfully", async () => {
-		const mockRoomId = types.Uuid.random();
-
-		await gateway.handleJoinRoom(mockSocket, mockRoomId);
-
-		expect(mockMiguelService.createConsumerForRoom).toHaveBeenCalledWith(
-			mockRoomId.toString()
-		);
-		expect(mockSocket.join).toHaveBeenCalledWith(mockRoomId.toString());
-	});
-  */
 });

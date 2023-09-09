@@ -17,25 +17,32 @@ exports.PicafeService = void 0;
 const common_1 = require("@nestjs/common");
 const pulsar_client_1 = require("pulsar-client");
 let PicafeService = PicafeService_1 = class PicafeService {
-    constructor(miguelProducer) {
-        this.miguelProducer = miguelProducer;
+    constructor(pulsarProducer) {
+        this.pulsarProducer = pulsarProducer;
         this.logger = new common_1.Logger(PicafeService_1.name);
     }
     async createMessage(message) {
         try {
-            this.sendMessageToProducer(message);
+            await this.sendMessageToProducer(message);
         }
         catch (error) {
             this.handleMessageFailure(error);
+            throw error;
         }
     }
     async sendMessageToProducer(message) {
-        const messageData = Buffer.from(JSON.stringify(message));
-        const producerMessage = {
-            data: messageData,
-            partitionKey: message.room_id.toString(),
-        };
-        await this.miguelProducer.send(producerMessage);
+        try {
+            const messageData = Buffer.from(JSON.stringify(message));
+            const producerMessage = {
+                data: messageData,
+                partitionKey: message.room_id.toString(),
+            };
+            await this.pulsarProducer.send(producerMessage);
+            this.logger.log(`Sent message to producer: ${JSON.stringify(message)}`);
+        }
+        catch (error) {
+            this.logger.error(`Failed to send message to producer: ${error.message}`);
+        }
     }
     handleMessageFailure(error) {
         this.logger.error(`Failed to handle message: ${error.message}`);
@@ -45,7 +52,7 @@ let PicafeService = PicafeService_1 = class PicafeService {
 exports.PicafeService = PicafeService;
 exports.PicafeService = PicafeService = PicafeService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, common_1.Inject)("MIGUEL")),
+    __param(0, (0, common_1.Inject)("PULSAR")),
     __metadata("design:paramtypes", [pulsar_client_1.Producer])
 ], PicafeService);
 //# sourceMappingURL=picafe.service.js.map

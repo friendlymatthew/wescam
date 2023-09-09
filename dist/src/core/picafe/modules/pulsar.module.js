@@ -6,27 +6,27 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MiguelModule = void 0;
+exports.PulsarModule = void 0;
 const common_1 = require("@nestjs/common");
 const pulsar_client_1 = require("pulsar-client");
-const miguel_service_1 = require("../service/miguel.service");
-const miguel = new pulsar_client_1.Client({
-    serviceUrl: "pulsar://localhost:6650",
+const pulsar_service_1 = require("../service/pulsar.service");
+const pulsar = new pulsar_client_1.Client({
+    serviceUrl: "pulsar://pulsar:6650",
 });
-let MiguelModule = class MiguelModule {
+let PulsarModule = class PulsarModule {
 };
-exports.MiguelModule = MiguelModule;
-exports.MiguelModule = MiguelModule = __decorate([
+exports.PulsarModule = PulsarModule;
+exports.PulsarModule = PulsarModule = __decorate([
     (0, common_1.Global)(),
     (0, common_1.Module)({
         providers: [
             {
-                provide: "MIGUEL",
-                useValue: miguel,
+                provide: "PULSAR",
+                useValue: pulsar,
             },
-            miguel_service_1.MiguelService,
+            pulsar_service_1.PulsarService,
         ],
-        exports: ["MIGUEL", miguel_service_1.MiguelService],
+        exports: ["PULSAR", pulsar_service_1.PulsarService],
     })
-], MiguelModule);
-//# sourceMappingURL=miguel.module.js.map
+], PulsarModule);
+//# sourceMappingURL=pulsar.module.js.map
