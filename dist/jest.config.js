@@ -5,6 +5,9 @@ const config = {
     transform: {
         "^.+\\.tsx?$": "ts-jest",
     },
+    moduleNameMapper: {
+        "^src/(.*)$": "<rootDir>/src/$1",
+    },
 };
 exports.default = config;
 //# sourceMappingURL=jest.config.js.map

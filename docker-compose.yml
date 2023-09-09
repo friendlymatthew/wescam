@@ -9,6 +9,8 @@ services:
       retries: 3
     ports:
       - "9042:9042"
+    volumes:
+      - scylla_data:/var/lib/scylla
 
   postgres:
     image: postgres:13
@@ -23,3 +25,9 @@ services:
       POSTGRES_DB: julia
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+  scylla_data:

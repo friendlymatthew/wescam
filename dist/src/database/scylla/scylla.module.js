@@ -9,11 +9,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ScyllaModule = void 0;
 const common_1 = require("@nestjs/common");
 const cassandra_driver_1 = require("cassandra-driver");
-const contactPoints = ["127.0.0.1:9042"];
-const keyspace = "picafe_chat";
+function getContactPoints() {
+    const defaultValue = ["127.0.0.1:9042"];
+    const envValue = process.env.SCYLLA_CONTACT_POINTS;
+    return envValue ? envValue.split(",") : defaultValue;
+}
+const contactPoints = getContactPoints();
+const keyspace = process.env.SCYLLA_KEYSPACE || "picafe_chat";
 const clientOptions = {
     contactPoints,
-    localDataCenter: "wesleyan",
+    localDataCenter: process.env.SCYLLA_LOCAL_DATACENTER || "wesleyan",
     keyspace,
 };
 const client = new cassandra_driver_1.Client(clientOptions);
