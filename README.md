@@ -5,12 +5,14 @@
 # XYZ: Real-time Encrypted Messaging Service
 
 [![Join Discord](https://img.shields.io/badge/Discord-Join%20Server-blue?style=for-the-badge&logo=discord)](https://discord.gg/gt8VTZfn6h)
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg?style=for-the-badge)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 ---
 
 ## Table of Contents
 
 - [Description](#description)
+- [License](#license)
 - [Environment Setup](#environment-setup)
   - [Node and Yarn](#node-and-yarn)
   - [NestJS](#nestjs)
