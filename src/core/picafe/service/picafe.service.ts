@@ -9,7 +9,8 @@ export interface PicafeServiceInterface {
 @Injectable()
 export class PicafeService implements PicafeServiceInterface {
 	private readonly logger = new Logger(PicafeService.name);
-	constructor(@Inject("MIGUEL") private readonly miguelProducer: Producer) {}
+
+	constructor(@Inject("PULSAR") private readonly pulsarProducer: Producer) {}
 
 	async createMessage(message: Message): Promise<void> {
 		try {
@@ -21,13 +22,17 @@ export class PicafeService implements PicafeServiceInterface {
 	}
 
 	private async sendMessageToProducer(message: Message) {
-		const messageData: Buffer = Buffer.from(JSON.stringify(message));
-		const producerMessage: ProducerMessage = {
-			data: messageData,
-			partitionKey: message.room_id.toString(),
-		};
-
-		await this.miguelProducer.send(producerMessage);
+		try {
+			const messageData: Buffer = Buffer.from(JSON.stringify(message));
+			const producerMessage: ProducerMessage = {
+				data: messageData,
+				partitionKey: message.room_id.toString(),
+			};
+			await this.pulsarProducer.send(producerMessage);
+			this.logger.log(`Sent message to producer: ${JSON.stringify(message)}`);
+		} catch (error) {
+			this.logger.error(`Failed to send message to producer: ${error.message}`);
+		}
 	}
 
 	private handleMessageFailure(error: any) {

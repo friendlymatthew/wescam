@@ -1,2 +1,4 @@
-export declare class ScyllaModule {
+import { OnModuleInit } from "@nestjs/common";
+export declare class ScyllaModule implements OnModuleInit {
+    onModuleInit(): Promise<void>;
 }

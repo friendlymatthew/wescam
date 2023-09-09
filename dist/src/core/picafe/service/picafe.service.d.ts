@@ -4,9 +4,9 @@ export interface PicafeServiceInterface {
     createMessage(message: Message): Promise<void>;
 }
 export declare class PicafeService implements PicafeServiceInterface {
-    private readonly miguelProducer;
+    private readonly pulsarProducer;
     private readonly logger;
-    constructor(miguelProducer: Producer);
+    constructor(pulsarProducer: Producer);
     createMessage(message: Message): Promise<void>;
     private sendMessageToProducer;
     private handleMessageFailure;

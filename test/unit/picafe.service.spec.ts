@@ -41,14 +41,14 @@ describe("PicafeService", () => {
 			providers: [
 				PicafeService,
 				{
-					provide: "MIGUEL",
+					provide: "PULSAR",
 					useValue: new Producer(),
 				},
 			],
 		}).compile();
 
 		service = module.get<PicafeService>(PicafeService);
-		mockProducer = jest.mocked(module.get<Producer>("MIGUEL"), {
+		mockProducer = jest.mocked(module.get<Producer>("PULSAR"), {
 			shallow: true,
 		});
 	});

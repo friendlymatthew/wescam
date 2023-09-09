@@ -1,15 +1,9 @@
 import { Module } from "@nestjs/common";
-import { AppService } from "./app.service";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
 import { CoreModule } from "./core/core.module";
-import GraphQLJSON from "graphql-type-json";
-import { GraphQLError } from "graphql";
 import { AppResolver } from "./app.resolver";
-import { HolidayInnResolver } from "./core/julia/resolvers/holidayinn.resolvers";
-import { EntityResolver } from "./core/julia/resolvers/entity.resolvers";
-import { ScyllaModule } from "./database/scylla/scylla.module";
-import { PicafeModule } from "./core/picafe/modules/picafe.module";
+import { ConfigModule } from "@nestjs/config"
 
 @Module({
 	imports: [
@@ -17,6 +11,7 @@ import { PicafeModule } from "./core/picafe/modules/picafe.module";
 			driver: ApolloDriver,
 			autoSchemaFile: true,
 		}),
+		ConfigModule.forRoot(),
 		CoreModule,
 	],
 	providers: [AppResolver],

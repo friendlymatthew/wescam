@@ -17,12 +17,22 @@ function getContactPoints() {
 const contactPoints = getContactPoints();
 const keyspace = process.env.SCYLLA_KEYSPACE || "picafe_chat";
 const clientOptions = {
-    contactPoints,
-    localDataCenter: process.env.SCYLLA_LOCAL_DATACENTER || "wesleyan",
-    keyspace,
+    contactPoints: [process.env.SCYLLA_CONTACT_POINTS || "localhost:9042"],
+    localDataCenter: process.env.SCYLLA_LOCAL_DATACENTER || "datacenter1",
+    keyspace: process.env.SCYLLA_KEYSPACE || "picafe_chat",
 };
 const client = new cassandra_driver_1.Client(clientOptions);
 let ScyllaModule = class ScyllaModule {
+    async onModuleInit() {
+        try {
+            await client.connect();
+            console.log("Connected to ScyllaDB");
+        }
+        catch (error) {
+            console.log("Failed to connect to ScyllaDB", error);
+            process.exit(1);
+        }
+    }
 };
 exports.ScyllaModule = ScyllaModule;
 exports.ScyllaModule = ScyllaModule = __decorate([
