@@ -9,7 +9,7 @@ export class HolidayInnResolver {
 	constructor(private readonly holidayInnService: HolidayInnService) {}
 
 	@Mutation(() => RoomEntityType)
-	async createOrUpdateRoom(
+	async createOrUpdateRoomMutation(
 		@Args("createRoomInput") createRoomInput: CreateRoomInput
 	): Promise<RoomEntityType> {
 		const room =
@@ -19,7 +19,7 @@ export class HolidayInnResolver {
 	}
 
 	@Query(() => [RoomEntityType])
-	async getRoomById(@Args("id") id: string): Promise<RoomEntityType[]> {
+	async getRoomsById(@Args("id") id: string): Promise<RoomEntityType[]> {
 		return await this.holidayInnService.getRoomsByUserId(id);
 	}
 }

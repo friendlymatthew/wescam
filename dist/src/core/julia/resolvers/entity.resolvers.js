@@ -19,11 +19,12 @@ const user_entity_1 = require("../entities/user.entity");
 const create_user_input_1 = require("../dto/create-user.input");
 const rogue_user_entity_1 = require("../entities/rogue-user.entity");
 const create_rogueuser_input_1 = require("../dto/create-rogueuser.input");
+const graphql_2 = require("@nestjs/graphql");
 let EntityResolver = class EntityResolver {
     constructor(entityService) {
         this.entityService = entityService;
     }
-    async createUser(createUserInput) {
+    async createUserMutation(createUserInput) {
         try {
             const user = await this.entityService.createUser(createUserInput);
             return user;
@@ -33,9 +34,24 @@ let EntityResolver = class EntityResolver {
             throw new Error("Failed to create user");
         }
     }
-    async createRogueUser(createRogueUserInput) {
+    async createRogueUserMutation(createRogueUserInput) {
         const rogueUser = await this.entityService.createRogueUser(createRogueUserInput);
         return rogueUser;
+    }
+    async getUserConfig(id) {
+        try {
+            const user = await this.entityService.getUserConfig(id);
+            if (user) {
+                return user;
+            }
+            else {
+                throw new Error("Failed to get user");
+            }
+        }
+        catch (error) {
+            console.log(error);
+            throw new Error("Failed to get user");
+        }
     }
 };
 exports.EntityResolver = EntityResolver;
@@ -45,14 +61,21 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_user_input_1.CreateUserInput]),
     __metadata("design:returntype", Promise)
-], EntityResolver.prototype, "createUser", null);
+], EntityResolver.prototype, "createUserMutation", null);
 __decorate([
     (0, graphql_1.Mutation)(() => rogue_user_entity_1.RogueUserType),
     __param(0, (0, graphql_1.Args)("createRogueUserInput")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_rogueuser_input_1.CreateRogueUserInput]),
     __metadata("design:returntype", Promise)
-], EntityResolver.prototype, "createRogueUser", null);
+], EntityResolver.prototype, "createRogueUserMutation", null);
+__decorate([
+    (0, graphql_2.Query)(() => user_entity_1.UserType, { nullable: true }),
+    __param(0, (0, graphql_1.Args)("id", { type: () => String })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], EntityResolver.prototype, "getUserConfig", null);
 exports.EntityResolver = EntityResolver = __decorate([
     (0, graphql_1.Resolver)(() => user_entity_1.UserType),
     __metadata("design:paramtypes", [entity_service_1.EntityService])

@@ -21,11 +21,11 @@ let HolidayInnResolver = class HolidayInnResolver {
     constructor(holidayInnService) {
         this.holidayInnService = holidayInnService;
     }
-    async createOrUpdateRoom(createRoomInput) {
+    async createOrUpdateRoomMutation(createRoomInput) {
         const room = await this.holidayInnService.createOrUpdateRoom(createRoomInput);
         return room;
     }
-    async getRoomById(id) {
+    async getRoomsById(id) {
         return await this.holidayInnService.getRoomsByUserId(id);
     }
 };
@@ -36,14 +36,14 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_room_input_1.CreateRoomInput]),
     __metadata("design:returntype", Promise)
-], HolidayInnResolver.prototype, "createOrUpdateRoom", null);
+], HolidayInnResolver.prototype, "createOrUpdateRoomMutation", null);
 __decorate([
     (0, graphql_1.Query)(() => [room_entity_1.RoomEntityType]),
     __param(0, (0, graphql_1.Args)("id")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
-], HolidayInnResolver.prototype, "getRoomById", null);
+], HolidayInnResolver.prototype, "getRoomsById", null);
 exports.HolidayInnResolver = HolidayInnResolver = __decorate([
     (0, graphql_1.Resolver)(() => room_entity_1.RoomEntityType),
     __metadata("design:paramtypes", [holidayinn_service_1.HolidayInnService])

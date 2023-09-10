@@ -4,6 +4,6 @@ import { RoomEntityType } from "../entities/room.entity";
 export declare class HolidayInnResolver {
     private readonly holidayInnService;
     constructor(holidayInnService: HolidayInnService);
-    createOrUpdateRoom(createRoomInput: CreateRoomInput): Promise<RoomEntityType>;
-    getRoomById(id: string): Promise<RoomEntityType[]>;
+    createOrUpdateRoomMutation(createRoomInput: CreateRoomInput): Promise<RoomEntityType>;
+    getRoomsById(id: string): Promise<RoomEntityType[]>;
 }

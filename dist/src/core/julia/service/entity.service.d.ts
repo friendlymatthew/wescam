@@ -7,4 +7,5 @@ export declare class EntityService {
     constructor(juliaService: JuliaService);
     createUser(input: CreateUserInput): Promise<PrismaUser>;
     createRogueUser(input: CreateRogueUserInput): Promise<PrismaRogueUser>;
+    getUserConfig(input: string): Promise<PrismaUser | null>;
 }

@@ -1,18 +1,23 @@
+# Using Node.js 16 as the base image
 FROM node:16
 
-# Create a directory where our app will be placed
-RUN mkdir -p /usr/src/app
+# Install debugging utilities
+RUN apt-get update && apt-get install -y \
+    lsb-release \
+    gdb \
+    && rm -rf /var/lib/apt/lists/*
 
-# Change directory so that our commands run inside this new directory
+# Create and set the working directory
+RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-# Copy dependency definitions
+# Copy package.json and yarn.lock to install dependencies
 COPY package.json yarn.lock ./
 
 # Install dependencies using yarn
-RUN yarn install
+RUN yarn install --verbose
 
-# Copying all other files from your local file system to the image
+# Copy other files from your local file system to the image
 COPY . .
 
 # Expose the port the app runs on

@@ -18,4 +18,8 @@ export class EntityService {
 	async createRogueUser(input: CreateRogueUserInput): Promise<PrismaRogueUser> {
 		return this.juliaService.createRogueUser(input);
 	}
+
+	async getUserConfig(input: string): Promise<PrismaUser | null> {
+		return this.juliaService.getUserConfig(input);
+	}
 }
