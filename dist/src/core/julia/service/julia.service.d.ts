@@ -15,6 +15,7 @@ export declare class JuliaService implements JuliaServiceInterface {
     createUser(input: CreateUserInput): Promise<PrismaUser>;
     createRogueUser(input: CreateRogueUserInput): Promise<PrismaRogueUser>;
     createOrUpdateRoom(input: CreateRoomInput): Promise<PrismaRoom>;
+    getUserConfig(input: string): Promise<PrismaUser | null>;
     getRoomsByUserId(userId: string): Promise<PrismaRoom[]>;
     private findExistingRoom;
     private deleteRogueUser;

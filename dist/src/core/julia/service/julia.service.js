@@ -95,6 +95,13 @@ let JuliaService = class JuliaService {
             });
         }
     }
+    async getUserConfig(input) {
+        return this.prisma.user.findFirst({
+            where: {
+                id: input,
+            },
+        });
+    }
     async getRoomsByUserId(userId) {
         return this.prisma.room.findMany({
             where: {

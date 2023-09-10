@@ -129,6 +129,13 @@ export class JuliaService implements JuliaServiceInterface {
 		}
 	}
 
+	async getUserConfig(input: string): Promise<PrismaUser | null> {
+		return this.prisma.user.findFirst({
+			where: {
+				id: input,
+			},
+		});
+	}
 	async getRoomsByUserId(userId: string): Promise<PrismaRoom[]> {
 		return this.prisma.room.findMany({
 			where: {

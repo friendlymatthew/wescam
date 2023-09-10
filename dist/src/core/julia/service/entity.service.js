@@ -22,6 +22,9 @@ let EntityService = class EntityService {
     async createRogueUser(input) {
         return this.juliaService.createRogueUser(input);
     }
+    async getUserConfig(input) {
+        return this.juliaService.getUserConfig(input);
+    }
 };
 exports.EntityService = EntityService;
 exports.EntityService = EntityService = __decorate([
