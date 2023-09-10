@@ -30,12 +30,14 @@ This repository contains the code for XYZ, a server-side real-time encrypted mes
 ---
 
 ## Environment Setup
-
 Before setting up the project, you need to install several dependencies:
 
-### Node and Yarn
 
-Firstly, ensure that Node.js and Yarn are installed on your system.
+### Docker
+Firstly, please download the docker application: [Docker](https://www.docker.com/products/docker-desktop/)
+
+### Node and Yarn
+Then, please ensure that Node.js and Yarn are installed on your system.
 
 ```bash
 brew install node
@@ -76,12 +78,19 @@ cd xyz
 yarn install
 ```
 
-3. Initiaize Prisma
+3. Run docker container
+  ```bash
+  # in xyz/
+
+  > docker-compose up
+  ```
+
+4. Initiaize Prisma
 ```bash
 prisma:generate
 ```
 
-4. Start and Setup a PostgreSQL database server, 
+5. Start and Setup a PostgreSQL database server, 
 
 ```bash
 $ sudo service postgresql start
