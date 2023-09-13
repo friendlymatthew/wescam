@@ -5,8 +5,18 @@ use std::sync::Arc;
 
 use crate::datatype::entity_type::{CreateUserInput, User, CreateRogueInput, Rogue};
 
-pub async fn create_user(session: Arc<Session>, user_input: CreateUserInput) -> Result<()> {
-    let user_id = ProcessUniqueId::new();
+
+pub async fn create_user(session: Arc<Session>, user_input: CreateUserInput) -> Result<User> {
+    let rogue_check_result = get_rogue_by_email(session.clone(), user_input.email.clone()).await;
+
+    let (user_id, rogue_used) = match rogue_check_result {
+        Ok(rogue) => {
+            (rogue.id, true)
+        },
+        Err(_) => {
+            (ProcessUniqueId::new().to_string(), false)
+        }
+    };
 
     let cql_query = format!(
         "INSERT INTO julia.users (id, name, email, class_year, pronouns) VALUES (?, ?, ?, ?, ?)"
@@ -15,12 +25,24 @@ pub async fn create_user(session: Arc<Session>, user_input: CreateUserInput) -> 
     session
         .query(
             cql_query,
-            (user_id.to_string(), user_input.name, user_input.email, user_input.pronouns, user_input.class_year)
+            (user_id.clone(), user_input.name.clone(), user_input.email.clone(), user_input.pronouns.clone(), user_input.class_year.clone())
         )
         .await?;
 
-    Ok(())
+    if rogue_used {
+        let cql_delete_rogue_query = "DELETE FROM julia.rogues WHERE id = ?";
+        session.query(cql_delete_rogue_query, (user_id.clone(),)).await?;
+    }
+
+    Ok(User {
+        id: user_id,
+        name: user_input.name,
+        email: user_input.email,
+        pronouns: user_input.pronouns,
+        class_year: user_input.class_year,
+    })
 }
+
 
 pub async fn get_user_by_id(session: Arc<Session>, id: String) -> Result<User> {
     let cql_query = "SELECT * FROM julia.users WHERE id = ?";
