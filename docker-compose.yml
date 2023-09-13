@@ -1,0 +1,15 @@
+version: "3"
+services:
+  scylla:
+    image: scylladb/scylla
+    container_name: scylla-db
+    ports:
+      - "9042:9042"
+    volumes:
+      - scylla-data:/var/lib/scylla
+    command:
+      - --smp 2
+      - --memory 2G
+
+volumes:
+  scylla-data:
