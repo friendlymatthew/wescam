@@ -5,8 +5,13 @@ use scylla::{Session, SessionBuilder};
 use std::error::Error;
 use std::sync::Arc;
 
+#[path = "./db/mod.rs"]
 mod db;
+
+#[path ="./datatype/mod.rs"]
 mod datatype;
+
+#[path="./api/mod.rs"]
 mod api;
 
 
@@ -22,13 +27,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     db::configs::table_config::create_tables(&session).await?; // Use the function from the db::table_config module
 
-    let health = warp::path!("health")
+
+    let health_route = warp::path!("health")
         .map(|| format!("Server is healthy"));
 
-    let api = api::entity_routes::routes(Arc::new(session));
+    let session_arc = Arc::new(session);
 
-    // Move warp serve to here, so it's reachable
-    warp::serve(api).run(([127, 0, 0, 1], 8080)).await;
+    let entity_route = api::entity_routes::routes(session_arc.clone());
+    let bond_route = api::bond_routes::routes(session_arc.clone());
+
+    let all_routes = health_route.or(entity_route).or(bond_route);
+
+    warp::serve(all_routes).run(([127, 0, 0, 1], 8080)).await;
 
     Ok(())
 }

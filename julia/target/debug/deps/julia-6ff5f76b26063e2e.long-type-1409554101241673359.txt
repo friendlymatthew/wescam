@@ -1,0 +1,1 @@
+for<'a> fn(Arc<Session>, &'a PreparedQueries, CreateUserInput) -> impl Future<Output = std::result::Result<impl Reply, Rejection>> {entity_routes::handle_create_user}
