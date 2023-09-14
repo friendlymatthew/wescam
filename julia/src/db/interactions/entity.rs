@@ -2,10 +2,10 @@ use scylla::{Session, IntoTypedRows };
 use snowflake::ProcessUniqueId;
 use anyhow::{Result, anyhow};
 use std::sync::Arc;
-
+use tracing::{info, instrument};
 use crate::datatype::entity_type::{CreateUserInput, User, CreateRogueInput, Rogue};
 
-
+#[instrument]
 pub async fn create_user(session: Arc<Session>, user_input: CreateUserInput) -> Result<User> {
     let rogue_check_result = get_rogue_by_email(session.clone(), user_input.email.clone()).await;
 
@@ -30,9 +30,11 @@ pub async fn create_user(session: Arc<Session>, user_input: CreateUserInput) -> 
         .await?;
 
     if rogue_used {
+        info!("rogue user existed so we will delete");
         let cql_delete_rogue_query = "DELETE FROM julia.rogues WHERE id = ?";
         session.query(cql_delete_rogue_query, (user_id.clone(),)).await?;
     }
+
 
     Ok(User {
         id: user_id,
@@ -43,7 +45,7 @@ pub async fn create_user(session: Arc<Session>, user_input: CreateUserInput) -> 
     })
 }
 
-
+#[instrument]
 pub async fn get_user_by_id(session: Arc<Session>, id: String) -> Result<User> {
     let cql_query = "SELECT * FROM julia.users WHERE id = ?";
 
@@ -67,6 +69,7 @@ pub async fn get_user_by_id(session: Arc<Session>, id: String) -> Result<User> {
     Err(anyhow!("No user found with the given ID"))
 }
 
+#[instrument]
 pub async fn create_rogue(session: Arc<Session>, rogue_input: CreateRogueInput) -> Result<()> {
     let user_id = ProcessUniqueId::new();
 
@@ -84,6 +87,7 @@ pub async fn create_rogue(session: Arc<Session>, rogue_input: CreateRogueInput) 
     Ok(())
 }
 
+#[instrument]
 pub async fn get_rogue_by_email(session: Arc<Session>, email: String) -> Result<Rogue> {
     let cql_query = "SELECT * FROM julia.rogues WHERE email = ?";
 
