@@ -6,7 +6,7 @@ use crate::db::interactions::entity::{
 };
 
 use crate::datatype::entity_type::{CreateUserInput, CreateRogueInput};
-use crate::db::configs::prepare_entity_query::PreparedEntityQueries;
+use crate::db::configs::prepare_entity_queries::PreparedEntityQueries;
 use warp::reject::Reject;
 use warp::Filter;
 

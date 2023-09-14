@@ -3,7 +3,7 @@ use snowflake::ProcessUniqueId;
 use anyhow::{Result, anyhow};
 use std::sync::Arc;
 use crate::datatype::entity_type::{CreateUserInput, User, CreateRogueInput, Rogue};
-use crate::db::configs::prepare_entity_query::PreparedEntityQueries;
+use crate::db::configs::prepare_entity_queries::PreparedEntityQueries;
 
 pub async fn create_user(
     session: Arc<Session>,
