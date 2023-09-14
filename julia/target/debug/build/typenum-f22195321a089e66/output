@@ -1,3 +1,0 @@
-cargo:rerun-if-changed=build/main.rs
-cargo:rustc-env=TYPENUM_BUILD_CONSTS=/Users/matthew/Desktop/GARAGE/xyz/julia/target/debug/build/typenum-f22195321a089e66/out/consts.rs
-cargo:rustc-env=TYPENUM_BUILD_OP=/Users/matthew/Desktop/GARAGE/xyz/julia/target/debug/build/typenum-f22195321a089e66/out/op.rs

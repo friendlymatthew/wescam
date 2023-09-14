@@ -1,1 +1,0 @@
-for<'a> fn(Arc<Session>, &'a PreparedQueries, CreateRogueInput) -> impl Future<Output = std::result::Result<impl Reply, Rejection>> {handle_create_rogue_user}

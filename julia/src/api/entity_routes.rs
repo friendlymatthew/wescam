@@ -4,8 +4,8 @@ use std::sync::Arc;
 use crate::db::interactions::entity::{
     create_user, create_rogue, get_user_by_id, get_rogue_by_email
 };
-
-use crate::datatype::entity_type::{CreateUserInput, CreateRogueInput};
+use serde::Serialize;
+use crate::datatype::entity_type::{Rogue, User, CreateUserInput, CreateRogueInput};
 use crate::db::configs::prepare_entity_query::PreparedEntityQueries;
 use warp::reject::Reject;
 use warp::Filter;
@@ -14,6 +14,7 @@ use warp::Filter;
 pub enum ApiError {
     InternalServerError,
     ValidationError(String),
+    NotFound,
 }
 
 impl Reject for ApiError {}
@@ -41,6 +42,20 @@ pub fn create_rogue_route(
         .and(warp::body::json())
         .and_then(handle_create_rogue_user)
 }
+
+
+#[derive(Serialize)]
+pub struct SingleRogueResponse {
+    pub message: String,
+    pub rogue: Rogue,
+}
+
+
+#[derive(Serialize)]
+pub struct SingleUserResponse {
+    pub message: String,
+    pub user: User,
+}
 pub fn create_user_route(
     session: Arc<Session>,
     prepared_queries: Arc<PreparedEntityQueries>
@@ -58,9 +73,18 @@ async fn handle_create_rogue_user(
     rogue_user: CreateRogueInput
 ) -> Result<impl warp::Reply, warp::Rejection> {
     match create_rogue(session.clone(), prepared_queries.clone(), rogue_user).await {
-        Ok(_) => Ok(warp::reply::with_status("Rogue user created successfully!", StatusCode::CREATED)),
+        Ok(rogue) => {
+            let response = SingleRogueResponse{
+                message: "Rogue user created successfully!".to_string(),
+                rogue,
+            };
+
+            let json_res = warp::reply::json(&response);
+
+            Ok(warp::reply::with_status(json_res, StatusCode::CREATED))
+        },
         Err(e) => {
-            eprintln!("Error occured while creating rogue: {:?}", e);
+            eprintln!("Error occurred while creating rogue: {:?}", e);
 
             let custom_error = map_error_to_api_error(e);
             Err(warp::reject::custom(custom_error))
@@ -73,14 +97,20 @@ async fn handle_create_user(
     user: CreateUserInput
 ) -> Result<impl warp::Reply, warp::Rejection> {
     match create_user(session.clone(), prepared_queries.clone(), user).await {
-        Ok(_) => Ok(warp::reply::with_status("User created successfully!", StatusCode::CREATED)),
+        Ok(user) => {
+            let response = SingleUserResponse {
+                message: "User created successfully!".to_string(),
+                user
+            };
+
+            let json_res = warp::reply::json(&response);
+
+            Ok(warp::reply::with_status(json_res, StatusCode::CREATED))
+        },
         Err(e) => {
-            // Log the error message for debugging purposes
             eprintln!("Error occurred while creating user: {:?}", e);
 
-            // Map the error to our custom ApiError type
             let custom_error = map_error_to_api_error(e);
-
             Err(warp::reject::custom(custom_error))
         }
     }
@@ -114,7 +144,9 @@ async fn handle_get_user_by_id(
     id: String
 ) -> Result<impl warp::Reply, warp::Rejection> {
     match get_user_by_id(session.clone(), prepared_queries.clone(), id).await {
-        Ok(user) => Ok(warp::reply::json(&user)),
+        Ok(user) => {
+            Ok(warp::reply::json(&user))
+        },
         Err(e) => {
             eprintln!("Error occured while fetching user: {:?}", e);
             let custom_error = map_error_to_api_error(e);
@@ -129,7 +161,15 @@ async fn handle_get_rogue_by_email(
     email: String
 ) -> Result<impl warp::Reply, warp::Rejection> {
     match get_rogue_by_email(session.clone(), prepared_queries.clone(), email).await {
-        Ok(rogue) => Ok(warp::reply::json(&rogue)),
+        Ok(rogue) => {
+            let response = SingleRogueResponse {
+                message: "Rogue user config found".to_string(),
+                rogue,
+            };
+
+            let json_res = warp::reply::json(&response);
+            Ok(json_res)
+        },
         Err(e) => {
             eprintln!("Error occured while fetching rogue: {:?}", e);
             let custom_error = map_error_to_api_error(e);

@@ -72,17 +72,20 @@ pub async fn get_user_by_id(
 pub async fn create_rogue(
     session: Arc<Session>,
     prepared_queries: Arc<PreparedEntityQueries>,
-    rogue_input: CreateRogueInput) -> Result<()> {
-    let user_id = ProcessUniqueId::new();
+    rogue_input: CreateRogueInput) -> Result<Rogue> {
+    let rogue_id = ProcessUniqueId::new();
 
     session
         .execute(
             &prepared_queries.insert_rogue,
-            (user_id.to_string(), rogue_input.email)
+            (rogue_id.to_string(), rogue_input.email.clone())
         )
         .await?;
 
-    Ok(())
+    Ok(Rogue {
+        id: rogue_id.to_string(),
+        email: rogue_input.email.clone()
+    })
 }
 
 pub async fn get_rogue_by_email(
