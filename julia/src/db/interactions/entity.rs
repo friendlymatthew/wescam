@@ -2,12 +2,14 @@ use scylla::{Session, IntoTypedRows };
 use snowflake::ProcessUniqueId;
 use anyhow::{Result, anyhow};
 use std::sync::Arc;
-use tracing::{info, instrument};
 use crate::datatype::entity_type::{CreateUserInput, User, CreateRogueInput, Rogue};
+use crate::db::configs::prepare_entity_query::PreparedEntityQueries;
 
-#[instrument]
-pub async fn create_user(session: Arc<Session>, user_input: CreateUserInput) -> Result<User> {
-    let rogue_check_result = get_rogue_by_email(session.clone(), user_input.email.clone()).await;
+pub async fn create_user(
+    session: Arc<Session>,
+    prepared_queries: Arc<PreparedEntityQueries>,
+    user_input: CreateUserInput) -> Result<User> {
+    let rogue_check_result = get_rogue_by_email(session.clone(),prepared_queries.clone(), user_input.email.clone()).await;
 
     let (user_id, rogue_used) = match rogue_check_result {
         Ok(rogue) => {
@@ -18,21 +20,17 @@ pub async fn create_user(session: Arc<Session>, user_input: CreateUserInput) -> 
         }
     };
 
-    let cql_query = format!(
-        "INSERT INTO julia.users (id, name, email, class_year, pronouns) VALUES (?, ?, ?, ?, ?)"
-    );
+
 
     session
-        .query(
-            cql_query,
+        .execute(
+            &prepared_queries.insert_user,
             (user_id.clone(), user_input.name.clone(), user_input.email.clone(), user_input.pronouns.clone(), user_input.class_year.clone())
         )
         .await?;
 
     if rogue_used {
-        info!("rogue user existed so we will delete");
-        let cql_delete_rogue_query = "DELETE FROM julia.rogues WHERE id = ?";
-        session.query(cql_delete_rogue_query, (user_id.clone(),)).await?;
+        session.execute(&prepared_queries.delete_rogue, (user_id.clone(),)).await?;
     }
 
 
@@ -45,11 +43,13 @@ pub async fn create_user(session: Arc<Session>, user_input: CreateUserInput) -> 
     })
 }
 
-#[instrument]
-pub async fn get_user_by_id(session: Arc<Session>, id: String) -> Result<User> {
-    let cql_query = "SELECT * FROM julia.users WHERE id = ?";
+pub async fn get_user_by_id(
+    session: Arc<Session>,
+    prepared_queries: Arc<PreparedEntityQueries>,
+    id: String
+) -> Result<User> {
 
-    let result = session.query(cql_query, (id,)).await?;
+    let result = session.execute(&prepared_queries.get_user_by_id, (id,)).await?;
 
     if let Some(rows) = result.rows {
         for row in rows.into_typed::<(String, String, String, String, String)>() {
@@ -69,17 +69,15 @@ pub async fn get_user_by_id(session: Arc<Session>, id: String) -> Result<User> {
     Err(anyhow!("No user found with the given ID"))
 }
 
-#[instrument]
-pub async fn create_rogue(session: Arc<Session>, rogue_input: CreateRogueInput) -> Result<()> {
+pub async fn create_rogue(
+    session: Arc<Session>,
+    prepared_queries: Arc<PreparedEntityQueries>,
+    rogue_input: CreateRogueInput) -> Result<()> {
     let user_id = ProcessUniqueId::new();
 
-    let cql_query = format!(
-        "INSERT INTO julia.rogues (id, email) VALUES (?, ?)"
-    );
-
     session
-        .query(
-            cql_query,
+        .execute(
+            &prepared_queries.insert_rogue,
             (user_id.to_string(), rogue_input.email)
         )
         .await?;
@@ -87,11 +85,13 @@ pub async fn create_rogue(session: Arc<Session>, rogue_input: CreateRogueInput) 
     Ok(())
 }
 
-#[instrument]
-pub async fn get_rogue_by_email(session: Arc<Session>, email: String) -> Result<Rogue> {
-    let cql_query = "SELECT * FROM julia.rogues WHERE email = ?";
+pub async fn get_rogue_by_email(
+    session: Arc<Session>,
+    prepared_queries: Arc<PreparedEntityQueries>,
+    email: String
+) -> Result<Rogue> {
 
-    let result = session.query(cql_query, (email,)).await?;
+    let result = session.execute(&prepared_queries.get_rogue_by_email, (email,)).await?;
 
     if let Some(rows) = result.rows {
         for row in rows.into_typed::<(String, String)>() {

@@ -15,7 +15,6 @@ mod datatype;
 #[path="./api/mod.rs"]
 mod api;
 
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
 
@@ -34,15 +33,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     db::configs::table_config::create_tables(&session).await?;
 
+    let session_arc = Arc::new(session);
+
+    let prepared_entity_queries = db::configs::prepare_entity_query::PreparedEntityQueries::new(session_arc.clone()).await?;
+    let prepared_entity_queries = Arc::new(prepared_entity_queries);
+
+    let entity_route = api::entity_routes::routes(session_arc.clone(), prepared_entity_queries.clone());
+    let bond_route = api::bond_routes::routes(session_arc.clone());
 
     let health_route = warp::path!("health")
         .map(|| format!("Server is healthy"));
 
-    let session_arc = Arc::new(session);
-    let entity_route = api::entity_routes::routes(session_arc.clone());
-    let bond_route = api::bond_routes::routes(session_arc.clone());
-
     let all_routes = health_route.or(entity_route).or(bond_route);
+
 
     warp::serve(all_routes).run(([127, 0, 0, 1], 8080)).await;
 

@@ -6,6 +6,7 @@ use crate::db::interactions::entity::{
 };
 
 use crate::datatype::entity_type::{CreateUserInput, CreateRogueInput};
+use crate::db::configs::prepare_entity_query::PreparedEntityQueries;
 use warp::reject::Reject;
 use warp::Filter;
 
@@ -17,31 +18,46 @@ pub enum ApiError {
 
 impl Reject for ApiError {}
 
-pub fn routes(session: Arc<Session> ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
-    let create_user = create_user_route(session.clone());
-    let create_rogue = create_rogue_route(session.clone());
-    let get_user = get_user_route(session.clone());
-    let get_rogue = get_rogue_route(session);
+pub fn routes(
+    session: Arc<Session>,
+    prepared_queries: Arc<PreparedEntityQueries>
+) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+    let create_user = create_user_route(session.clone(), prepared_queries.clone());
+    let create_rogue = create_rogue_route(session.clone(), prepared_queries.clone());
+    let get_user = get_user_route(session.clone(), prepared_queries.clone());
+    let get_rogue = get_rogue_route(session, prepared_queries.clone());
 
     create_user.or(create_rogue).or(get_user).or(get_rogue)
 }
 
-pub fn create_rogue_route(session: Arc<Session>) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+pub fn create_rogue_route(
+    session: Arc<Session>,
+    prepared_queries: Arc<PreparedEntityQueries>,
+) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     warp::path!("create_rogue")
         .and(warp::post())
         .and(with_session(session))
+        .and(with_prepared_queries(prepared_queries))
         .and(warp::body::json())
         .and_then(handle_create_rogue_user)
 }
-pub fn create_user_route(session: Arc<Session>) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+pub fn create_user_route(
+    session: Arc<Session>,
+    prepared_queries: Arc<PreparedEntityQueries>
+) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     warp::path!("create_user")
         .and(warp::post())
         .and(with_session(session))
+        .and(with_prepared_queries(prepared_queries))
         .and(warp::body::json())
         .and_then(handle_create_user)
 }
-async fn handle_create_rogue_user(session: Arc<Session>, rogue_user: CreateRogueInput) -> Result<impl warp::Reply, warp::Rejection> {
-    match create_rogue(session.clone(), rogue_user).await {
+async fn handle_create_rogue_user(
+    session: Arc<Session>,
+    prepared_queries: Arc<PreparedEntityQueries>,
+    rogue_user: CreateRogueInput
+) -> Result<impl warp::Reply, warp::Rejection> {
+    match create_rogue(session.clone(), prepared_queries.clone(), rogue_user).await {
         Ok(_) => Ok(warp::reply::with_status("Rogue user created successfully!", StatusCode::CREATED)),
         Err(e) => {
             eprintln!("Error occured while creating rogue: {:?}", e);
@@ -51,8 +67,12 @@ async fn handle_create_rogue_user(session: Arc<Session>, rogue_user: CreateRogue
         }
     }
 }
-async fn handle_create_user(session: Arc<Session>, user: CreateUserInput) -> Result<impl warp::Reply, warp::Rejection> {
-    match create_user(session.clone(), user).await {
+async fn handle_create_user(
+    session: Arc<Session>,
+    prepared_queries: Arc<PreparedEntityQueries>,
+    user: CreateUserInput
+) -> Result<impl warp::Reply, warp::Rejection> {
+    match create_user(session.clone(), prepared_queries.clone(), user).await {
         Ok(_) => Ok(warp::reply::with_status("User created successfully!", StatusCode::CREATED)),
         Err(e) => {
             // Log the error message for debugging purposes
@@ -66,22 +86,34 @@ async fn handle_create_user(session: Arc<Session>, user: CreateUserInput) -> Res
     }
 }
 
-pub fn get_user_route(session: Arc<Session>) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+pub fn get_user_route(
+    session: Arc<Session>,
+    prepared_queries: Arc<PreparedEntityQueries>
+) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     warp::path!("get_user_by_id" / String)
         .and(warp::get())
         .and(with_session(session))
-        .and_then(|id, session| handle_get_user_by_id(session, id))
+        .and(with_prepared_queries(prepared_queries))
+        .and_then(|id, session, prepared_queries| handle_get_user_by_id(session, prepared_queries, id))
 }
 
-pub fn get_rogue_route(session: Arc<Session>) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+pub fn get_rogue_route(
+    session: Arc<Session>,
+    prepared_queries: Arc<PreparedEntityQueries>
+) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     warp::path!("get_rogue_by_email" / String)
         .and(warp::get())
         .and(with_session(session))
-        .and_then(|email, session| handle_get_rogue_by_email(session, email))
+        .and(with_prepared_queries(prepared_queries))
+        .and_then(|email, session, prepared_queries| handle_get_rogue_by_email(session, prepared_queries, email))
 }
 
-async fn handle_get_user_by_id(session: Arc<Session>, id: String) -> Result<impl warp::Reply, warp::Rejection> {
-    match get_user_by_id(session.clone(), id).await {
+async fn handle_get_user_by_id(
+    session: Arc<Session>,
+    prepared_queries: Arc<PreparedEntityQueries>,
+    id: String
+) -> Result<impl warp::Reply, warp::Rejection> {
+    match get_user_by_id(session.clone(), prepared_queries.clone(), id).await {
         Ok(user) => Ok(warp::reply::json(&user)),
         Err(e) => {
             eprintln!("Error occured while fetching user: {:?}", e);
@@ -91,8 +123,12 @@ async fn handle_get_user_by_id(session: Arc<Session>, id: String) -> Result<impl
     }
 }
 
-async fn handle_get_rogue_by_email(session: Arc<Session>, email: String) -> Result<impl warp::Reply, warp::Rejection> {
-    match get_rogue_by_email(session.clone(), email).await {
+async fn handle_get_rogue_by_email(
+    session: Arc<Session>,
+    prepared_queries: Arc<PreparedEntityQueries>,
+    email: String
+) -> Result<impl warp::Reply, warp::Rejection> {
+    match get_rogue_by_email(session.clone(), prepared_queries.clone(), email).await {
         Ok(rogue) => Ok(warp::reply::json(&rogue)),
         Err(e) => {
             eprintln!("Error occured while fetching rogue: {:?}", e);
@@ -102,6 +138,11 @@ async fn handle_get_rogue_by_email(session: Arc<Session>, email: String) -> Resu
     }
 }
 
+fn with_prepared_queries(
+    prepared_queries: Arc<PreparedEntityQueries>,
+) -> impl Filter<Extract = (Arc<PreparedEntityQueries>,), Error = std::convert::Infallible> + Clone {
+    warp::any().map(move || prepared_queries.clone())
+}
 
 fn with_session(
     session: Arc<Session>,
