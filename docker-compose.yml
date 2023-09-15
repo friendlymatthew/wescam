@@ -10,6 +10,24 @@ services:
     command:
       - --smp 2
       - --memory 2G
+    healthcheck: # Defining health check
+      test: [ "CMD-SHELL", "cqlsh --connect-timeout 5" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  julia:
+    build:
+      context: ./julia
+      dockerfile: Dockerfile
+    container_name: julia
+    ports:
+      - "8080:8080"
+    depends_on:
+      - scylla
+    environment:
+      - SCYLLA_URI=scylla:9042
+
 
 volumes:
   scylla-data:
