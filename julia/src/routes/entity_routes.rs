@@ -1,8 +1,6 @@
 use crate::datatype::entity_type::{CreateRogueInput, CreateUserInput, Rogue, User};
-use crate::db::configs::prepare_entity_query::PreparedEntityQueries;
-use crate::db::interactions::entity::{
-    create_rogue, create_user, get_rogue_by_email, get_user_by_id,
-};
+use crate::db::config::prepare_entity_query::PreparedEntityQueries;
+use crate::db::service::entity::{create_rogue, create_user, get_rogue_by_email, get_user_by_id};
 use scylla::Session;
 use serde::Serialize;
 use std::sync::Arc;

@@ -1,6 +1,6 @@
 use crate::datatype::bond_type::CreateBondInput;
-use crate::db::configs::prepare_bond_query::PreparedBondQueries;
-use crate::db::interactions::bond::{form_bond, get_bonds_by_user_id};
+use crate::db::config::prepare_bond_query::PreparedBondQueries;
+use crate::db::service::bond::{form_bond, get_bonds_by_user_id};
 use scylla::Session;
 use std::sync::Arc;
 use warp::http::StatusCode;

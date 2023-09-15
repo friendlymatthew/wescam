@@ -2,7 +2,7 @@ use scylla::Session;
 use std::error::Error;
 use tracing::{error, info};
 
-pub async fn create_tables(session: &Session) -> Result<(), Box<dyn Error>> {
+pub async fn initialize(session: &Session) -> Result<(), Box<dyn Error>> {
     info!("Starting to create keyspaces and tables...");
 
     let config_queries = vec![

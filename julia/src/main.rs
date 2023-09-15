@@ -1,81 +1,33 @@
-extern crate warp;
-
-use scylla::{Session, SessionBuilder};
+use scylla::Session;
 use std::error::Error;
 use std::sync::Arc;
 use tracing::{error, info, warn};
 use warp::Filter;
-
 #[path = "./db/mod.rs"]
 mod db;
-
+use crate::db::config::{db_config, route_config, table_config};
 #[path = "./datatype/mod.rs"]
 mod datatype;
-
-#[path = "./api/mod.rs"]
-mod api;
+#[path = "routes/mod.rs"]
+mod routes;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     tracing_subscriber::fmt::init();
 
-    let uri = std::env::var("SCYLLA_URI").unwrap_or_else(|_| "127.0.0.1:9042".to_string());
+    let uri_key = "SCYLLA_URI";
+    let session: Session = db_config::initialize(uri_key).await.map_err(|e| {
+        error!("Failed to build session: {}", e);
+        e
+    })?;
 
-    info!("Connecting to ScyllaDB at URI: {}", uri);
-
-    let session: Session = SessionBuilder::new()
-        .known_node(uri)
-        .build()
-        .await
-        .map_err(|e| {
-            error!("Failed to build session: {}", e);
-            e
-        })?;
-
-    info!("ScyllaDB session built successfully");
-
-    match db::configs::table_config::create_tables(&session).await {
-        Ok(_) => info!("Successfully created tables"),
+    match table_config::initialize(&session).await {
+        Ok(_) => info!("Successfully generated julia keyspace and tables"),
         Err(e) => warn!("Failed to generate julia keyspace and tables: {}", e),
     }
 
     let session_arc = Arc::new(session);
-    info!("Arc session created.");
-
-    let prepared_entity_queries =
-        db::configs::prepare_entity_query::PreparedEntityQueries::new(session_arc.clone())
-            .await
-            .map_err(|e| {
-                error!("Failed to prepare entity queries: {}", e);
-                e
-            })?;
-    info!("Entity queries prepared");
-
-    let prepared_entity_queries = Arc::new(prepared_entity_queries);
-
-    let entity_route =
-        api::entity_routes::routes(session_arc.clone(), prepared_entity_queries.clone());
-    info!("Entity routes configured");
-
-    let prepared_bond_queries =
-        db::configs::prepare_bond_query::PreparedBondQueries::new(session_arc.clone())
-            .await
-            .map_err(|e| {
-                error!("Failed to prepare bond queries: {}", e);
-                e
-            })?;
-    info!("Bond queries prepared");
-    let prepared_bond_queries = Arc::new(prepared_bond_queries);
-
-    let bond_route = api::bond_routes::routes(session_arc.clone(), prepared_bond_queries);
-    info!("Bond routes configured");
-
-    let health_route = warp::path!("health").map(|| {
-        info!("Health check triggered");
-        format!("Server is healthy")
-    });
-
-    let all_routes = health_route.or(entity_route).or(bond_route);
+    let all_routes = route_config::initialize(session_arc.clone()).await?;
 
     info!("Starting the server at 127.0.0.1:8080");
     warp::serve(all_routes).run(([127, 0, 0, 1], 8080)).await;

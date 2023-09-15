@@ -1,2 +1,2 @@
-pub mod configs;
-pub mod interactions;
+pub mod config;
+pub mod service;

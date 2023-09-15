@@ -1,5 +1,5 @@
 use crate::datatype::bond_type::{Bond, CreateBondInput};
-use crate::db::configs::prepare_bond_query::PreparedBondQueries;
+use crate::db::config::prepare_bond_query::PreparedBondQueries;
 use anyhow::Result;
 use chrono::{DateTime, Utc};
 use scylla::{IntoTypedRows, Session};

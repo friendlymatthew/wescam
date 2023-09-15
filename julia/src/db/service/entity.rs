@@ -1,5 +1,5 @@
 use crate::datatype::entity_type::{CreateRogueInput, CreateUserInput, Rogue, User};
-use crate::db::configs::prepare_entity_query::PreparedEntityQueries;
+use crate::db::config::prepare_entity_query::PreparedEntityQueries;
 use anyhow::{anyhow, Result};
 use scylla::{IntoTypedRows, Session};
 use snowflake::ProcessUniqueId;
