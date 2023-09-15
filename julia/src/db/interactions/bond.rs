@@ -1,4 +1,5 @@
 use crate::datatype::bond_type::{Bond, CreateBondInput};
+use crate::db::configs::prepare_bond_query::PreparedBondQueries;
 use anyhow::Result;
 use chrono::{DateTime, Utc};
 use scylla::{IntoTypedRows, Session};
@@ -7,12 +8,15 @@ use std::sync::Arc;
 
 async fn check_existing_bond(
     session: Arc<Session>,
+    prepared_queries: Arc<PreparedBondQueries>,
     creator_id: String,
     crush_id: String,
 ) -> Result<Option<Bond>> {
-    let check_cql_query = "SELECT * FROM julia.bonds WHERE (creator_id = ? AND crush_id = ?)";
     let result = session
-        .query(check_cql_query, (crush_id.clone(), creator_id.clone()))
+        .execute(
+            &prepared_queries.check_existing_bond,
+            (crush_id.clone(), creator_id.clone()),
+        )
         .await?;
 
     if let Some(rows) = result.rows {
@@ -33,9 +37,14 @@ async fn check_existing_bond(
     Ok(None)
 }
 
-pub async fn form_bond(session: Arc<Session>, bond_input: CreateBondInput) -> Result<Bond> {
+pub async fn form_bond(
+    session: Arc<Session>,
+    prepared_queries: Arc<PreparedBondQueries>,
+    bond_input: CreateBondInput,
+) -> Result<Bond> {
     let existing_bond = check_existing_bond(
         session.clone(),
+        prepared_queries.clone(),
         bond_input.creator_id.clone(),
         bond_input.crush_id.clone(),
     )
@@ -46,11 +55,9 @@ pub async fn form_bond(session: Arc<Session>, bond_input: CreateBondInput) -> Re
     let return_bond: Bond;
 
     if let Some(mut existing_bond) = existing_bond {
-        let update_cql_query =
-            "UPDATE julia.bonds SET game_status = ?, updated_at = ? WHERE id = ?";
         session
-            .query(
-                update_cql_query,
+            .execute(
+                &prepared_queries.update_bond,
                 (1, updated_at.to_string(), existing_bond.id.clone()),
             )
             .await?;
@@ -62,10 +69,9 @@ pub async fn form_bond(session: Arc<Session>, bond_input: CreateBondInput) -> Re
     } else {
         let bond_id = ProcessUniqueId::new();
         let created_at: DateTime<Utc> = Utc::now();
-        let insert_cql_query = "INSERT INTO julia.bonds (id, creator_id, crush_id, bond_type, game_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)";
         session
-            .query(
-                insert_cql_query,
+            .execute(
+                &prepared_queries.form_bond,
                 (
                     bond_id.to_string(),
                     bond_input.creator_id.clone(),
@@ -92,10 +98,16 @@ pub async fn form_bond(session: Arc<Session>, bond_input: CreateBondInput) -> Re
     return Ok(return_bond);
 }
 
-pub async fn get_bonds_by_user_id(session: Arc<Session>, user_id: String) -> Result<Vec<Bond>> {
-    let cql_query = "SELECT * FROM julia.bonds WHERE creator_id = ? OR crush_id = ?";
+pub async fn get_bonds_by_user_id(
+    session: Arc<Session>,
+    prepared_queries: Arc<PreparedBondQueries>,
+    user_id: String,
+) -> Result<Vec<Bond>> {
     let result = session
-        .query(cql_query, (user_id.clone(), user_id.clone()))
+        .execute(
+            &prepared_queries.get_user_bonds,
+            (user_id.clone(), user_id.clone()),
+        )
         .await?;
 
     let mut bonds: Vec<Bond> = Vec::new();

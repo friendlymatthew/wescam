@@ -57,7 +57,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
         api::entity_routes::routes(session_arc.clone(), prepared_entity_queries.clone());
     info!("Entity routes configured");
 
-    let bond_route = api::bond_routes::routes(session_arc.clone());
+    let prepared_bond_queries =
+        db::configs::prepare_bond_query::PreparedBondQueries::new(session_arc.clone())
+            .await
+            .map_err(|e| {
+                error!("Failed to prepare bond queries: {}", e);
+                e
+            })?;
+    info!("Bond queries prepared");
+    let prepared_bond_queries = Arc::new(prepared_bond_queries);
+
+    let bond_route = api::bond_routes::routes(session_arc.clone(), prepared_bond_queries);
     info!("Bond routes configured");
 
     let health_route = warp::path!("health").map(|| {
