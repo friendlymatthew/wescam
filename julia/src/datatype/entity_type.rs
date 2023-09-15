@@ -1,4 +1,3 @@
-
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -28,4 +27,3 @@ pub struct User {
     pub pronouns: String,
     pub class_year: String,
 }
-

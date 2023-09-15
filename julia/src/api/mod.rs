@@ -1,4 +1,2 @@
-
-
-pub mod entity_routes;
 pub mod bond_routes;
+pub mod entity_routes;

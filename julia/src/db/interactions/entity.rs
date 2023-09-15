@@ -1,38 +1,45 @@
-use scylla::{Session, IntoTypedRows };
-use snowflake::ProcessUniqueId;
-use anyhow::{Result, anyhow};
-use std::sync::Arc;
-use crate::datatype::entity_type::{CreateUserInput, User, CreateRogueInput, Rogue};
+use crate::datatype::entity_type::{CreateRogueInput, CreateUserInput, Rogue, User};
 use crate::db::configs::prepare_entity_query::PreparedEntityQueries;
+use anyhow::{anyhow, Result};
+use scylla::{IntoTypedRows, Session};
+use snowflake::ProcessUniqueId;
+use std::sync::Arc;
 
 pub async fn create_user(
     session: Arc<Session>,
     prepared_queries: Arc<PreparedEntityQueries>,
-    user_input: CreateUserInput) -> Result<User> {
-    let rogue_check_result = get_rogue_by_email(session.clone(),prepared_queries.clone(), user_input.email.clone()).await;
+    user_input: CreateUserInput,
+) -> Result<User> {
+    let rogue_check_result = get_rogue_by_email(
+        session.clone(),
+        prepared_queries.clone(),
+        user_input.email.clone(),
+    )
+    .await;
 
     let (user_id, rogue_used) = match rogue_check_result {
-        Ok(rogue) => {
-            (rogue.id, true)
-        },
-        Err(_) => {
-            (ProcessUniqueId::new().to_string(), false)
-        }
+        Ok(rogue) => (rogue.id, true),
+        Err(_) => (ProcessUniqueId::new().to_string(), false),
     };
-
-
 
     session
         .execute(
             &prepared_queries.insert_user,
-            (user_id.clone(), user_input.name.clone(), user_input.email.clone(), user_input.pronouns.clone(), user_input.class_year.clone())
+            (
+                user_id.clone(),
+                user_input.name.clone(),
+                user_input.email.clone(),
+                user_input.pronouns.clone(),
+                user_input.class_year.clone(),
+            ),
         )
         .await?;
 
     if rogue_used {
-        session.execute(&prepared_queries.delete_rogue, (user_id.clone(),)).await?;
+        session
+            .execute(&prepared_queries.delete_rogue, (user_id.clone(),))
+            .await?;
     }
-
 
     Ok(User {
         id: user_id,
@@ -46,10 +53,11 @@ pub async fn create_user(
 pub async fn get_user_by_id(
     session: Arc<Session>,
     prepared_queries: Arc<PreparedEntityQueries>,
-    id: String
+    id: String,
 ) -> Result<User> {
-
-    let result = session.execute(&prepared_queries.get_user_by_id, (id,)).await?;
+    let result = session
+        .execute(&prepared_queries.get_user_by_id, (id,))
+        .await?;
 
     if let Some(rows) = result.rows {
         for row in rows.into_typed::<(String, String, String, String, String)>() {
@@ -61,7 +69,7 @@ pub async fn get_user_by_id(
                 name,
                 email,
                 class_year,
-                pronouns
+                pronouns,
             });
         }
     }
@@ -72,39 +80,38 @@ pub async fn get_user_by_id(
 pub async fn create_rogue(
     session: Arc<Session>,
     prepared_queries: Arc<PreparedEntityQueries>,
-    rogue_input: CreateRogueInput) -> Result<Rogue> {
+    rogue_input: CreateRogueInput,
+) -> Result<Rogue> {
     let rogue_id = ProcessUniqueId::new();
 
     session
         .execute(
             &prepared_queries.insert_rogue,
-            (rogue_id.to_string(), rogue_input.email.clone())
+            (rogue_id.to_string(), rogue_input.email.clone()),
         )
         .await?;
 
     Ok(Rogue {
         id: rogue_id.to_string(),
-        email: rogue_input.email.clone()
+        email: rogue_input.email.clone(),
     })
 }
 
 pub async fn get_rogue_by_email(
     session: Arc<Session>,
     prepared_queries: Arc<PreparedEntityQueries>,
-    email: String
+    email: String,
 ) -> Result<Rogue> {
-
-    let result = session.execute(&prepared_queries.get_rogue_by_email, (email,)).await?;
+    let result = session
+        .execute(&prepared_queries.get_rogue_by_email, (email,))
+        .await?;
 
     if let Some(rows) = result.rows {
         for row in rows.into_typed::<(String, String)>() {
             let (id, email) = row?;
 
             // Construct a Rogue object from the obtained values
-            return Ok(Rogue {
-                id,
-                email
-            });
+            return Ok(Rogue { id, email });
         }
     }
 

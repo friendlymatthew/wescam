@@ -9,7 +9,6 @@ pub async fn create_tables(session: &Session) -> Result<(), Box<dyn Error>> {
         )
         .await?;
 
-
     session
         .query(
             "CREATE TABLE IF NOT EXISTS julia.rogues (id text PRIMARY KEY, email text);",
@@ -18,12 +17,8 @@ pub async fn create_tables(session: &Session) -> Result<(), Box<dyn Error>> {
         .await?;
 
     session
-        .query(
-            "CREATE INDEX IF NOT EXISTS ON julia.rogues (email);",
-            (),
-        )
+        .query("CREATE INDEX IF NOT EXISTS ON julia.rogues (email);", ())
         .await?;
-
 
     session
         .query(

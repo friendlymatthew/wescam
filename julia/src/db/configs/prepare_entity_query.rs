@@ -1,6 +1,6 @@
-use scylla::{Session, prepared_statement::PreparedStatement};
-use std::sync::Arc;
 use anyhow::Result;
+use scylla::{prepared_statement::PreparedStatement, Session};
+use std::sync::Arc;
 
 pub struct PreparedEntityQueries {
     pub insert_user: PreparedStatement,
@@ -9,7 +9,6 @@ pub struct PreparedEntityQueries {
     pub delete_rogue: PreparedStatement,
     pub get_rogue_by_email: PreparedStatement,
 }
-
 
 impl PreparedEntityQueries {
     pub async fn new(session: Arc<Session>) -> Result<Self> {
