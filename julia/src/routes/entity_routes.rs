@@ -4,6 +4,8 @@ use crate::db::service::entity::{create_rogue, create_user, get_rogue_by_email, 
 use scylla::Session;
 use serde::Serialize;
 use std::sync::Arc;
+use tracing::log::log;
+use tracing::{error, info};
 use warp::http::StatusCode;
 use warp::reject::Reject;
 use warp::Filter;
@@ -76,12 +78,15 @@ async fn handle_create_rogue_user(
 
             let json_res = warp::reply::json(&response);
 
+            info!("rogue created successfully!");
             Ok(warp::reply::with_status(json_res, StatusCode::CREATED))
         }
         Err(e) => {
             eprintln!("Error occurred while creating rogue: {:?}", e);
 
             let custom_error = map_error_to_api_error(e);
+
+            error!("rogue creation error");
             Err(warp::reject::custom(custom_error))
         }
     }
@@ -100,12 +105,14 @@ async fn handle_create_user(
 
             let json_res = warp::reply::json(&response);
 
+            info!("User created successfully!");
             Ok(warp::reply::with_status(json_res, StatusCode::CREATED))
         }
         Err(e) => {
             eprintln!("Error occurred while creating user: {:?}", e);
 
             let custom_error = map_error_to_api_error(e);
+            info!("User creation error");
             Err(warp::reject::custom(custom_error))
         }
     }
@@ -143,10 +150,15 @@ async fn handle_get_user_by_id(
     id: String,
 ) -> Result<impl warp::Reply, warp::Rejection> {
     match get_user_by_id(session.clone(), prepared_queries.clone(), id).await {
-        Ok(user) => Ok(warp::reply::json(&user)),
+        Ok(user) => {
+            info!("User config fetched successfully");
+
+            Ok(warp::reply::json(&user))
+        }
         Err(e) => {
             eprintln!("Error occured while fetching user: {:?}", e);
             let custom_error = map_error_to_api_error(e);
+
             Err(warp::reject::custom(custom_error))
         }
     }
@@ -165,10 +177,11 @@ async fn handle_get_rogue_by_email(
             };
 
             let json_res = warp::reply::json(&response);
+            info!("Rogue user successfully found");
             Ok(json_res)
         }
         Err(e) => {
-            eprintln!("Error occurred while fetching rogue: {:?}", e);
+            error!("Error occurred while fetching rogue: {:?}", e);
             let custom_error = map_error_to_api_error(e);
             Err(warp::reject::custom(custom_error))
         }

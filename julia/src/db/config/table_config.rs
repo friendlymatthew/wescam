@@ -12,6 +12,7 @@ pub async fn initialize(session: &Session) -> Result<(), Box<dyn Error>> {
         "CREATE INDEX IF NOT EXISTS ON julia.rogues (email);",
 
         "CREATE TABLE IF NOT EXISTS julia.users (id text PRIMARY KEY, email text, name text, pronouns text, class_year text);",
+
         "CREATE TABLE IF NOT EXISTS julia.bonds (id text PRIMARY KEY, creator_id text, crush_id text, bond_type text, game_status text, created_at timestamp, updated_at timestamp);",
     ];
 

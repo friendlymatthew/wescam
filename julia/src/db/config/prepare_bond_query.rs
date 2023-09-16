@@ -1,11 +1,13 @@
 use anyhow::Result;
 use scylla::{prepared_statement::PreparedStatement, Session};
 use std::sync::Arc;
+use tracing::{error, info, warn};
 
 pub struct PreparedBondQueries {
     pub form_bond: PreparedStatement,
     pub update_bond: PreparedStatement,
-    pub get_user_bonds: PreparedStatement,
+    pub get_bonds_by_creator: PreparedStatement,
+    pub get_bonds_by_crush: PreparedStatement,
     pub check_existing_bond: PreparedStatement,
 }
 
@@ -19,18 +21,23 @@ impl PreparedBondQueries {
             .prepare("UPDATE julia.bonds SET game_status = ?, updated_at = ? WHERE id = ?")
             .await?;
 
-        let get_user_bonds = session
-            .prepare("SELECT * FROM julia.bonds WHERE creator_id = ? OR crush_id = ?")
+        let get_bonds_by_creator = session
+            .prepare("SELECT * FROM julia.bonds WHERE creator_id = ?")
+            .await?;
+
+        let get_bonds_by_crush = session
+            .prepare("SELECT * FROM julia.bonds WHERE crush_id = ?")
             .await?;
 
         let check_existing_bond = session
-            .prepare("SELECT * FROM julia.bonds WHERE (creator_id = ? AND crush_id = ?)")
+            .prepare("SELECT * FROM julia.bonds WHERE id = ?")
             .await?;
 
         Ok(Self {
             form_bond,
             update_bond,
-            get_user_bonds,
+            get_bonds_by_creator,
+            get_bonds_by_crush,
             check_existing_bond,
         })
     }

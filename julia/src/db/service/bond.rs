@@ -5,6 +5,7 @@ use chrono::{DateTime, Utc};
 use scylla::{IntoTypedRows, Session};
 use snowflake::ProcessUniqueId;
 use std::sync::Arc;
+use tracing::error;
 
 async fn check_existing_bond(
     session: Arc<Session>,
@@ -12,11 +13,10 @@ async fn check_existing_bond(
     creator_id: String,
     crush_id: String,
 ) -> Result<Option<Bond>> {
+    let bond_key = format!("{}{}", crush_id, creator_id);
+
     let result = session
-        .execute(
-            &prepared_queries.check_existing_bond,
-            (crush_id.clone(), creator_id.clone()),
-        )
+        .execute(&prepared_queries.check_existing_bond, (bond_key,))
         .await?;
 
     if let Some(rows) = result.rows {
@@ -67,13 +67,14 @@ pub async fn form_bond(
 
         return_bond = existing_bond;
     } else {
-        let bond_id = ProcessUniqueId::new();
+        let bond_key = format!("{}{}", bond_input.creator_id, bond_input.crush_id,);
+
         let created_at: DateTime<Utc> = Utc::now();
         session
             .execute(
                 &prepared_queries.form_bond,
                 (
-                    bond_id.to_string(),
+                    &bond_key,
                     bond_input.creator_id.clone(),
                     bond_input.crush_id.clone(),
                     bond_input.bond_type,
@@ -85,7 +86,7 @@ pub async fn form_bond(
             .await?;
 
         return_bond = Bond {
-            id: bond_id.to_string(),
+            id: bond_key,
             creator_id: bond_input.creator_id,
             crush_id: bond_input.crush_id,
             bond_type: bond_input.bond_type,
@@ -103,16 +104,37 @@ pub async fn get_bonds_by_user_id(
     prepared_queries: Arc<PreparedBondQueries>,
     user_id: String,
 ) -> Result<Vec<Bond>> {
-    let result = session
-        .execute(
-            &prepared_queries.get_user_bonds,
-            (user_id.clone(), user_id.clone()),
-        )
-        .await?;
-
     let mut bonds: Vec<Bond> = Vec::new();
 
-    if let Some(rows) = result.rows {
+    let result_creator = session
+        .execute(&prepared_queries.get_bonds_by_creator, (user_id.clone(),))
+        .await?;
+
+    if let Some(rows) = result_creator.rows {
+        for row in rows.into_typed::<(String, String, String, i32, i32, String, String)>() {
+            let (id, creator_id, crush_id, bond_type, game_status, created_at, updated_at) = row?;
+
+            let bond = Bond {
+                id,
+                creator_id,
+                crush_id,
+                bond_type,
+                game_status,
+                created_at,
+                updated_at,
+            };
+
+            bonds.push(bond);
+        }
+    }
+
+    // TODO! REFACTOR
+
+    let result_crush = session
+        .execute(&prepared_queries.get_bonds_by_crush, (user_id.clone(),))
+        .await?;
+
+    if let Some(rows) = result_crush.rows {
         for row in rows.into_typed::<(String, String, String, i32, i32, String, String)>() {
             let (id, creator_id, crush_id, bond_type, game_status, created_at, updated_at) = row?;
 

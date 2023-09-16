@@ -17,7 +17,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let uri_key = "SCYLLA_URI";
     let session: Session = db_config::initialize(uri_key).await.map_err(|e| {
-        error!("Failed to build session: {}", e);
+        error!("Failed to build session");
         e
     })?;
 
