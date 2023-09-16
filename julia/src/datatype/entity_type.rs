@@ -1,6 +1,5 @@
-
 use serde::{Deserialize, Serialize};
-
+use uuid::Uuid;
 #[derive(Debug, Deserialize, Serialize)]
 pub struct CreateRogueInput {
     pub email: String,
@@ -8,8 +7,8 @@ pub struct CreateRogueInput {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Rogue {
-    pub id: String,
     pub email: String,
+    pub id: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -28,4 +27,3 @@ pub struct User {
     pub pronouns: String,
     pub class_year: String,
 }
-

@@ -1,11 +1,11 @@
 use serde::{Deserialize, Serialize};
-
+use uuid::Uuid;
 #[derive(Debug, Deserialize, Serialize)]
 pub struct CreateBondInput {
     pub creator_id: String,
     pub crush_id: String,
 
-    pub bond_type: i32,  // 0 - dormant, 1 - active
+    pub bond_type: i32,   // 0 - dormant, 1 - active
     pub game_status: i32, // 0 - guess, 1 - match
 }
 
