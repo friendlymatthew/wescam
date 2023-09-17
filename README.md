@@ -1,7 +1,10 @@
-## xyz is an asynchronous chat and web service 
-[![IMG_8028.jpg](..%2FIMG_8028.jpg)](https://discord.gg/gt8VTZfn6h)
+## _xyz is an asynchronous chat and web service_
+<a href="https://discord.gg/gt8VTZfn6h" target="_blank">
+    <img src="https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord" alt="Join our Discord" width="300"/>
+</a>
 <br />
 <br />
+
 ### What you need 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop) 🐳
 - [Cargo (Rust package manager)](https://rust-lang.org/tools/install) 📦
