@@ -1,41 +1,27 @@
-# XYZ Project 🌟
-
- This is an open-source backend service written in Rust 🦀.
-
-This service utilizes technologies such as ScyllaDB, Tokio, and Warp.
-
-## Prerequisites 🛠️
-
-Before you proceed, make sure you have the following software installed on your machine:
-
+## xyz is an asynchronous chat and web service 
+[![IMG_8028.jpg](..%2FIMG_8028.jpg)](https://discord.gg/gt8VTZfn6h)
+<br />
+<br />
+### What you need 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop) 🐳
 - [Cargo (Rust package manager)](https://rust-lang.org/tools/install) 📦
 
-## Setup Steps 👩‍💻👨‍💻
-
+### Clone our project 
 Follow the steps below to get the project up and running:
-
-### Clone the Repository 📂
 ```bash
-git@github.com:xyz-hq/xyz.git
+git clone git@github.com:xyz-hq/xyz.git
 
 cd xyz
 ```
-
-
-### Start ScyllaDB with Docker 🐳
-
+### Start container 🐳
 Since the `docker-compose.yml` file is located in the base directory, you can run it from there:
-
 ```bash
-docker-compose up -d
+docker-compose up --build
 ```
+Please verify Scylla DB is up and running on localhost:9042 in your docker container.
 
-Please verify your scylla db is up and running on localhost:9042 in your docker container.
-
-### Run the Application 🚀
-
-CD into the `julia` directory to run the Rust application:
+### Run a service  🚀
+CD into the `julia` directory to run the server:
 
 ```bash
 cd julia
@@ -44,14 +30,7 @@ cargo run
 ```
 
 ## Resources 📖
+- [The Scylla Rust doc](https://rust-driver.docs.scylladb.com/stable/queries/result.html).and([the CQL doc](https://cassandra.apache.org/doc/latest/cassandra/cql/index.html))
+- [Tokio](https://github.com/tokio-rs/tokio#readme)
+- [Warp](https://github.com/seanmonstar/warp)
 
-- For handling queries and results in ScyllaDB, the [Scylla Rust Driver Documentation](https://rust-driver.docs.scylladb.com/stable/queries/result.html) is the go-to resource 📚.
-- We utilize various Rust crates from [Crates.io](https://crates.io/) 📦.
-- The asynchronous programming is achieved using [Tokio](https://tokio.rs/) 🚀.
-- [Warp](https://github.com/seanmonstar/warp) is used for route handling and filtering 🌐.
-
-## Contributing 🤝
-Feel free to contribute to this project by creating issues, sending pull requests, or simply spreading the word 🗨️.
-
-## License 📄
-XYZ is open-source software licensed under the [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License](https://creativecommons.org/licenses/by-nc-nd/4.0/) 📝.

@@ -128,5 +128,7 @@ pub async fn get_bonds_by_user_id(
         }
     }
 
+    // TODO! refactor to handle both queries
+
     Ok(bonds)
 }

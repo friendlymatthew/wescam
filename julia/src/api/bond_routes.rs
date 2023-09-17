@@ -3,7 +3,6 @@ use crate::db::configs::prepared_queries::bond_queries::BondQueries;
 use crate::db::interactions::bond::{form_bond, get_bonds_by_user_id};
 use scylla::Session;
 use std::sync::Arc;
-use uuid::Uuid;
 use warp::http::StatusCode;
 use warp::reject::Reject;
 use warp::Filter;
