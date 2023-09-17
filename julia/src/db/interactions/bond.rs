@@ -13,6 +13,7 @@ async fn check_existing_bond(
     crush_id: String,
 ) -> Result<Option<Bond>> {
     let bond_id = crush_id.to_string() + &creator_id.to_string();
+
     let result = session
         .execute(&prepared_queries.check_existing_bond, (bond_id,))
         .await?;

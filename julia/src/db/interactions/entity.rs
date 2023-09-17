@@ -64,7 +64,6 @@ pub async fn get_user_by_id(
         for row in rows.into_typed::<(String, String, String, String, String)>() {
             let (id, name, email, class_year, pronouns) = row?;
 
-            // Construct a User object from the obtained values
             return Ok(User {
                 id,
                 name,
@@ -110,7 +109,7 @@ pub async fn get_rogue_by_email(
     if let Some(rows) = result.rows {
         for row in rows.into_typed::<(String, String)>() {
             let (email, id) = row?;
-            // Construct a Rogue object from the obtained values
+
             return Ok(Rogue { email, id });
         }
     }

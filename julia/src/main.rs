@@ -16,14 +16,7 @@ mod datatype;
 #[path = "./api/mod.rs"]
 mod api;
 
-pub async fn drop_table(session: Arc<Session>) -> Result<(), Box<dyn Error>> {
-    let drop_query = "DROP TABLE IF EXISTS julia.rogues";
 
-    session.query(drop_query, &[]).await?;
-    println!("Table dropped successfully");
-
-    Ok(())
-}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -36,10 +29,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let session: Session = SessionBuilder::new().known_node(uri).build().await?;
 
     let session_arc = Arc::new(session);
-    // Now clone the Arc and pass it to the function
-    drop_table(session_arc.clone()).await?;
-
-    // Initialize tables
+    table_config::drop(&session_arc).await?;
     table_config::initialize(&session_arc).await?;
 
     let prepared_entity_queries = entity_queries::EntityQueries::new(session_arc.clone()).await?;
