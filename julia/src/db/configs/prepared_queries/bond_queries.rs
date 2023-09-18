@@ -1,9 +1,13 @@
+use crate::db::configs::prepared_queries::utility::PreparedQueries;
 use anyhow::Result;
+use async_trait::async_trait;
 use scylla::prepared_statement::PreparedStatement;
 use scylla::Session;
+use std::error::Error;
 use std::sync::Arc;
 use tracing::info;
 
+#[derive(Clone)]
 pub struct BondQueries {
     pub form_bond: PreparedStatement,
     pub check_existing_bond: PreparedStatement,
@@ -13,8 +17,9 @@ pub struct BondQueries {
     pub update_bond: PreparedStatement,
 }
 
-impl BondQueries {
-    pub async fn new(session: Arc<Session>) -> Result<Self> {
+#[async_trait]
+impl PreparedQueries for BondQueries {
+    async fn new(session: Arc<Session>) -> Result<Self, Box<dyn Error>> {
         info!("Preparing bond queries...");
 
         let form_bond = session
@@ -47,7 +52,7 @@ impl BondQueries {
             .await?;
         info!("Update bond query set");
 
-        Ok(Self {
+        Ok(BondQueries {
             form_bond,
             check_existing_bond,
             fetch_user_creator_bonds,
