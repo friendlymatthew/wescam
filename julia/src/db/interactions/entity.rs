@@ -1,16 +1,15 @@
 use crate::datatype::entity_type::{CreateRogueInput, CreateUserInput, Rogue, User};
 use crate::db::configs::prepared_queries::entity_queries::EntityQueries;
 use anyhow::{anyhow, Result};
-use scylla::{IntoTypedRows, Session};
+use scylla::{batch::Batch, IntoTypedRows, Session};
 use std::sync::Arc;
-use tracing::info;
 use uuid::Uuid;
 
 pub async fn create_user(
     session: Arc<Session>,
     prepared_queries: Arc<EntityQueries>,
     user_input: CreateUserInput,
-) -> Result<User> {
+) -> Result<User, Box<dyn std::error::Error>> {
     let rogue_check_result = get_rogue_by_email(
         session.clone(),
         prepared_queries.clone(),
@@ -23,9 +22,13 @@ pub async fn create_user(
         Err(_) => (Uuid::new_v4().to_string(), false),
     };
 
-    session
-        .execute(
-            &prepared_queries.insert_user,
+    if rogue_used {
+        let mut batch = Batch::default();
+
+        batch.append_statement(prepared_queries.insert_user.clone());
+        batch.append_statement(prepared_queries.delete_rogue.clone());
+
+        let batch_values = (
             (
                 user_id.clone(),
                 user_input.name.clone(),
@@ -33,14 +36,24 @@ pub async fn create_user(
                 user_input.pronouns.clone(),
                 user_input.class_year.clone(),
             ),
-        )
-        .await?;
+            (user_input.email.clone(),),);
 
-    if rogue_used {
+        session.batch(&batch, batch_values).await?;
+    } else {
         session
-            .execute(&prepared_queries.delete_rogue, (user_input.email.clone(),))
+            .execute(
+                &prepared_queries.insert_user,
+                (
+                    user_id.clone(),
+                    user_input.name.clone(),
+                    user_input.email.clone(),
+                    user_input.pronouns.clone(),
+                    user_input.class_year.clone(),
+                ),
+            )
             .await?;
     }
+
 
     Ok(User {
         id: user_id,

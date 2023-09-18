@@ -16,8 +16,6 @@ mod datatype;
 #[path = "./api/mod.rs"]
 mod api;
 
-
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     tracing_subscriber::fmt::init();

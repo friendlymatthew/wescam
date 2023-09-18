@@ -11,6 +11,8 @@ pub async fn initialize(session: &Session) -> Result<(), Box<dyn Error>> {
         ("generate_users", "CREATE TABLE IF NOT EXISTS julia.users (id text PRIMARY KEY, email text, name text, pronouns text, class_year text);"),
         ("generate_rogues", "CREATE TABLE IF NOT EXISTS julia.rogues (email text, id text, PRIMARY KEY (email));"),
         ("generate_bonds", "CREATE TABLE IF NOT EXISTS julia.bonds (id text PRIMARY KEY, creator_id text, crush_id text, bond_type text, game_status text, created_at timestamp, updated_at timestamp);"),
+        ("bond_creator_index", "CREATE INDEX on julia.bonds (creator_id);"),
+        ("bond_crush_index", "CREATE INDEX on julia.bonds (crush_id);")
     ];
 
     for &(title, current_query) in &queries {
