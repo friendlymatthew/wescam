@@ -1,8 +1,12 @@
+use crate::db::configs::prepared_queries::utility::PreparedQueries;
 use anyhow::Result;
+use async_trait::async_trait;
 use scylla::{prepared_statement::PreparedStatement, Session};
+use std::error::Error;
 use std::sync::Arc;
 use tracing::info;
 
+#[derive(Clone)]
 pub struct EntityQueries {
     pub insert_user: PreparedStatement,
     pub get_user_by_id: PreparedStatement,
@@ -11,8 +15,9 @@ pub struct EntityQueries {
     pub get_rogue_by_email: PreparedStatement,
 }
 
-impl EntityQueries {
-    pub async fn new(session: Arc<Session>) -> Result<Self> {
+#[async_trait]
+impl PreparedQueries for EntityQueries {
+    async fn new(session: Arc<Session>) -> Result<Self, Box<dyn Error>> {
         info!("Preparing entity queries");
 
         let insert_user = session
@@ -40,7 +45,7 @@ impl EntityQueries {
             .await?;
         info!("Delete rogue user query set");
 
-        Ok(Self {
+        Ok(EntityQueries {
             insert_user,
             get_user_by_id,
             insert_rogue,

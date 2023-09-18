@@ -36,7 +36,8 @@ pub async fn create_user(
                 user_input.pronouns.clone(),
                 user_input.class_year.clone(),
             ),
-            (user_input.email.clone(),),);
+            (user_input.email.clone(),),
+        );
 
         session.batch(&batch, batch_values).await?;
     } else {
@@ -53,7 +54,6 @@ pub async fn create_user(
             )
             .await?;
     }
-
 
     Ok(User {
         id: user_id,

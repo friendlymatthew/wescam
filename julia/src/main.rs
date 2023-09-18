@@ -1,10 +1,9 @@
 extern crate warp;
-
-use db::configs::{prepared_queries::bond_queries, prepared_queries::entity_queries, table_config};
-use scylla::{Session, SessionBuilder};
+use db::configs::{
+    prepared_queries::bond_queries, prepared_queries::entity_queries, prepared_queries::utility,
+    scylla_config,
+};
 use std::error::Error;
-use std::sync::Arc;
-use tracing::info;
 use warp::Filter;
 
 #[path = "./db/mod.rs"]
@@ -22,22 +21,27 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let uri = std::env::var("SCYLLA_URI").unwrap_or_else(|_| "127.0.0.1:9042".to_string());
 
-    info!("Connecting to {}", uri);
+    let scylla_service = scylla_config::ScyllaConfig::create_session(uri).await?;
+    scylla_service.populate_table().await?;
 
-    let session: Session = SessionBuilder::new().known_node(uri).build().await?;
+    let prepared_entity_queries = utility::wrap_prepared_queries::<entity_queries::EntityQueries>(
+        scylla_service.session.clone(),
+    )
+    .await?;
 
-    let session_arc = Arc::new(session);
-    table_config::drop(&session_arc).await?;
-    table_config::initialize(&session_arc).await?;
+    let entity_route = api::entity_routes::routes(
+        scylla_service.session.clone(),
+        prepared_entity_queries.clone(),
+    );
 
-    let prepared_entity_queries = entity_queries::EntityQueries::new(session_arc.clone()).await?;
-    let prepared_entity_queries = Arc::new(prepared_entity_queries);
-    let entity_route =
-        api::entity_routes::routes(session_arc.clone(), prepared_entity_queries.clone());
+    let prepared_bond_queries =
+        utility::wrap_prepared_queries::<bond_queries::BondQueries>(scylla_service.session.clone())
+            .await?;
 
-    let prepared_bond_queries = bond_queries::BondQueries::new(session_arc.clone()).await?;
-    let prepared_bond_queries = Arc::new(prepared_bond_queries);
-    let bond_route = api::bond_routes::routes(session_arc.clone(), prepared_bond_queries);
+    let bond_route = api::bond_routes::routes(
+        scylla_service.session.clone(),
+        prepared_bond_queries.clone(),
+    );
 
     let health_route = warp::path!("health").map(|| format!("Server is healthy"));
 
