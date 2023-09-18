@@ -1,9 +1,10 @@
-use crate::datatype::bond_type::{Bond, CreateBondInput};
+use crate::db::datatype::bond_type::{Bond, CreateBondInput};
 use crate::db::configs::prepared_queries::bond_queries::BondQueries;
 use anyhow::Result;
 use chrono::{DateTime, Utc};
 use scylla::{IntoTypedRows, Session};
 use std::sync::Arc;
+use scylla::batch::Batch;
 use uuid::Uuid;
 
 async fn check_existing_bond(
@@ -54,12 +55,13 @@ pub async fn form_bond(
     let return_bond: Bond;
 
     if let Some(mut existing_bond) = existing_bond {
-        session
-            .execute(
-                &prepared_queries.update_bond,
-                (1, updated_at.to_string(), existing_bond.id.clone()),
-            )
-            .await?;
+
+        let mut batch: Batch = Batch::default();
+
+        batch.append_statement(prepared_queries.update_bond());
+        let batch_value =  (1, updated_at.to_string(), existing_bond.id.clone())
+
+        session.batch(&batch, batch_value).await?;
 
         existing_bond.game_status = 1;
         existing_bond.updated_at = updated_at.to_string();

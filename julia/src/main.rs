@@ -9,9 +9,6 @@ use warp::Filter;
 #[path = "./db/mod.rs"]
 mod db;
 
-#[path = "./datatype/mod.rs"]
-mod datatype;
-
 #[path = "./api/mod.rs"]
 mod api;
 

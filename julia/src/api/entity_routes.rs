@@ -1,4 +1,4 @@
-use crate::datatype::entity_type::{CreateRogueInput, CreateUserInput, Rogue, User};
+use crate::db::datatype::entity_type::{CreateRogueInput, CreateUserInput, Rogue, User};
 use crate::db::configs::prepared_queries::entity_queries::EntityQueries;
 use crate::db::interactions::entity::{
     create_rogue, create_user, get_rogue_by_email, get_user_by_id,

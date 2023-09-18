@@ -1,9 +1,9 @@
-use crate::datatype::entity_type::{CreateRogueInput, CreateUserInput, Rogue, User};
 use crate::db::configs::prepared_queries::entity_queries::EntityQueries;
 use anyhow::{anyhow, Result};
 use scylla::{batch::Batch, IntoTypedRows, Session};
 use std::sync::Arc;
 use uuid::Uuid;
+use crate::db::datatype::entity_type::{CreateUserInput, User, Rogue, CreateRogueInput};
 
 pub async fn create_user(
     session: Arc<Session>,

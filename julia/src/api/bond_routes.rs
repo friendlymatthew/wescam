@@ -1,4 +1,4 @@
-use crate::datatype::bond_type::CreateBondInput;
+use crate::db::datatype::bond_type::CreateBondInput;
 use crate::db::configs::prepared_queries::bond_queries::BondQueries;
 use crate::db::interactions::bond::{form_bond, get_bonds_by_user_id};
 use scylla::Session;
