@@ -58,8 +58,14 @@ pub async fn form_bond(
 
         let mut batch: Batch = Batch::default();
 
-        batch.append_statement(prepared_queries.update_bond());
-        let batch_value =  (1, updated_at.to_string(), existing_bond.id.clone())
+        batch.append_statement(prepared_queries.update_bond.clone());
+        let batch_value =  (
+            (
+                1,
+                updated_at.to_string(),
+                existing_bond.id.clone()
+            ),
+        );
 
         session.batch(&batch, batch_value).await?;
 
