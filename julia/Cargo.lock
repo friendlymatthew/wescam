@@ -596,6 +596,7 @@ dependencies = [
  "serde",
  "serde_json",
  "snowflake",
+ "thiserror",
  "tokio",
  "tracing",
  "tracing-subscriber",

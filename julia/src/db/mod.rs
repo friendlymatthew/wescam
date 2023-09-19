@@ -1,3 +1,3 @@
 pub mod configs;
-pub mod interactions;
+pub mod service;
 pub mod datatype;

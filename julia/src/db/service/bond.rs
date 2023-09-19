@@ -1,18 +1,18 @@
 use crate::db::datatype::bond_type::{Bond, CreateBondInput};
 use crate::db::configs::prepared_queries::bond_queries::BondQueries;
-use anyhow::Result;
 use chrono::{DateTime, Utc};
 use scylla::{IntoTypedRows, Session};
 use std::sync::Arc;
 use scylla::batch::Batch;
 use uuid::Uuid;
+use crate::db::service::service_errors::Error;
 
 async fn check_existing_bond(
     session: Arc<Session>,
     prepared_queries: Arc<BondQueries>,
     creator_id: String,
     crush_id: String,
-) -> Result<Option<Bond>> {
+) -> Result<Option<Bond>, Error> {
     let bond_id = crush_id.to_string() + &creator_id.to_string();
 
     let result = session
@@ -41,7 +41,7 @@ pub async fn form_bond(
     session: Arc<Session>,
     prepared_queries: Arc<BondQueries>,
     bond_input: CreateBondInput,
-) -> Result<Bond> {
+) -> Result<Bond, Error> {
     let existing_bond = check_existing_bond(
         session.clone(),
         prepared_queries.clone(),
@@ -109,7 +109,7 @@ pub async fn get_bonds_by_user_id(
     session: Arc<Session>,
     prepared_queries: Arc<BondQueries>,
     user_id: String,
-) -> Result<Vec<Bond>> {
+) -> Result<Vec<Bond>, Error> {
     let creator_result = session
         .execute(
             &prepared_queries.fetch_user_creator_bonds,

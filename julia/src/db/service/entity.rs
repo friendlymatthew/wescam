@@ -1,15 +1,16 @@
 use crate::db::configs::prepared_queries::entity_queries::EntityQueries;
-use anyhow::{anyhow, Result};
 use scylla::{batch::Batch, IntoTypedRows, Session};
 use std::sync::Arc;
 use uuid::Uuid;
 use crate::db::datatype::entity_type::{CreateUserInput, User, Rogue, CreateRogueInput};
+use crate::db::service::service_errors::Error;
+use crate::db::service::service_errors::Error::NotFound;
 
 pub async fn create_user(
     session: Arc<Session>,
     prepared_queries: Arc<EntityQueries>,
     user_input: CreateUserInput,
-) -> Result<User, Box<dyn std::error::Error>> {
+) -> Result<User, Error>{
     let rogue_check_result = get_rogue_by_email(
         session.clone(),
         prepared_queries.clone(),
@@ -40,6 +41,7 @@ pub async fn create_user(
         );
 
         session.batch(&batch, batch_values).await?;
+
     } else {
         session
             .execute(
@@ -68,7 +70,7 @@ pub async fn get_user_by_id(
     session: Arc<Session>,
     prepared_queries: Arc<EntityQueries>,
     id: String,
-) -> Result<User> {
+) -> Result<User, Error> {
     let result = session
         .execute(&prepared_queries.get_user_by_id, (id,))
         .await?;
@@ -87,14 +89,14 @@ pub async fn get_user_by_id(
         }
     }
 
-    Err(anyhow!("No user found with the given ID"))
+    Err(NotFound)
 }
 
 pub async fn create_rogue(
     session: Arc<Session>,
     prepared_queries: Arc<EntityQueries>,
     rogue_input: CreateRogueInput,
-) -> Result<Rogue> {
+) -> Result<Rogue, Error> {
     let rogue_id = Uuid::new_v4();
 
     session
@@ -114,7 +116,7 @@ pub async fn get_rogue_by_email(
     session: Arc<Session>,
     prepared_queries: Arc<EntityQueries>,
     email: String,
-) -> Result<Rogue> {
+) -> Result<Rogue, Error> {
     let result = session
         .execute(&prepared_queries.get_rogue_by_email, (email,))
         .await?;
@@ -127,5 +129,5 @@ pub async fn get_rogue_by_email(
         }
     }
 
-    Err(anyhow!("No rogue found with the given ID"))
+    Err(NotFound)
 }

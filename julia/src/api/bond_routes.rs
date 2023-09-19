@@ -1,19 +1,12 @@
 use crate::db::datatype::bond_type::CreateBondInput;
 use crate::db::configs::prepared_queries::bond_queries::BondQueries;
-use crate::db::interactions::bond::{form_bond, get_bonds_by_user_id};
+use crate::db::service::bond::{form_bond, get_bonds_by_user_id};
 use scylla::Session;
 use std::sync::Arc;
 use warp::http::StatusCode;
-use warp::reject::Reject;
 use warp::Filter;
+use crate::api::api_errors::{handle_rejection, map_error_to_api_error};
 
-#[derive(Debug)]
-pub enum ApiError {
-    InternalServerError,
-    ValidationError(String),
-}
-
-impl Reject for ApiError {}
 
 pub fn routes(
     session: Arc<Session>,
@@ -22,7 +15,8 @@ pub fn routes(
     let create_bond = create_bond_route(session.clone(), prepared_queries.clone());
     let get_user_bonds = get_bonds_by_user_id_route(session.clone(), prepared_queries.clone());
 
-    create_bond.or(get_user_bonds)
+    let all_route = create_bond.or(get_user_bonds);
+    all_route.recover(handle_rejection)
 }
 
 pub fn create_bond_route(
@@ -97,11 +91,3 @@ fn with_session(
     warp::any().map(move || session.clone())
 }
 
-fn map_error_to_api_error<T: ToString>(error: T) -> ApiError {
-    let error_string = error.to_string();
-    if error_string.contains("Validation") {
-        ApiError::ValidationError(error_string)
-    } else {
-        ApiError::InternalServerError
-    }
-}
