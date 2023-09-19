@@ -1,23 +1,17 @@
 use crate::db::datatype::entity_type::{CreateRogueInput, CreateUserInput, Rogue, User};
 use crate::db::configs::prepared_queries::entity_queries::EntityQueries;
-use crate::db::interactions::entity::{
+use crate::db::service::entity::{
     create_rogue, create_user, get_rogue_by_email, get_user_by_id,
 };
 use scylla::Session;
 use serde::Serialize;
 use std::sync::Arc;
 use warp::http::StatusCode;
-use warp::reject::Reject;
 use warp::Filter;
+use crate::api::api_errors::{ApiError, handle_rejection, map_error_to_api_error};
 
-#[derive(Debug)]
-pub enum ApiError {
-    InternalServerError,
-    ValidationError(String),
-    NotFound,
-}
 
-impl Reject for ApiError {}
+
 
 pub fn routes(
     session: Arc<Session>,
@@ -28,7 +22,9 @@ pub fn routes(
     let get_user = get_user_route(session.clone(), prepared_queries.clone());
     let get_rogue = get_rogue_route(session, prepared_queries.clone());
 
-    create_user.or(create_rogue).or(get_user).or(get_rogue)
+    let all_routes = create_user.or(create_rogue).or(get_user).or(get_rogue);
+
+    all_routes.recover(handle_rejection)
 }
 
 pub fn create_rogue_route(
@@ -190,11 +186,3 @@ fn with_session(
     warp::any().map(move || session.clone())
 }
 
-fn map_error_to_api_error<T: ToString>(error: T) -> ApiError {
-    let error_string = error.to_string();
-    if error_string.contains("Validation") {
-        ApiError::ValidationError(error_string)
-    } else {
-        ApiError::InternalServerError
-    }
-}
