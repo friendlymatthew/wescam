@@ -1,4 +1,4 @@
-use crate::db::configs::table_config;
+use crate::scylladb::configs::table_config;
 use scylla::{Session, SessionBuilder};
 use std::sync::Arc;
 use tracing::info;

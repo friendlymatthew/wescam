@@ -1,10 +1,10 @@
-use crate::db::configs::prepared_queries::entity_queries::EntityQueries;
+use crate::scylladb::configs::prepared_queries::entity_queries::EntityQueries;
 use scylla::{batch::Batch, IntoTypedRows, Session};
 use std::sync::Arc;
 use uuid::Uuid;
-use crate::db::datatype::entity_type::{CreateUserInput, User, Rogue, CreateRogueInput};
-use crate::db::service::service_errors::Error;
-use crate::db::service::service_errors::Error::NotFound;
+use crate::scylladb::datatype::entity_type::{CreateUserInput, User, Rogue, CreateRogueInput};
+use crate::scylladb::service::service_errors::Error;
+use crate::scylladb::service::service_errors::Error::NotFound;
 
 pub async fn create_user(
     session: Arc<Session>,
@@ -18,9 +18,9 @@ pub async fn create_user(
     )
     .await;
 
-    let (user_id, rogue_used) = match rogue_check_result {
-        Ok(rogue) => (rogue.id, true),
-        Err(_) => (Uuid::new_v4().to_string(), false),
+    let (user_guid, rogue_used) = match rogue_check_result {
+        Ok(rogue) => (rogue.guid, true),
+        Err(_) => (Uuid::new_v4(), false),
     };
 
     if rogue_used {
@@ -31,7 +31,7 @@ pub async fn create_user(
 
         let batch_values = (
             (
-                user_id.clone(),
+                user_guid.clone(),
                 user_input.name.clone(),
                 user_input.email.clone(),
                 user_input.pronouns.clone(),
@@ -47,7 +47,7 @@ pub async fn create_user(
             .execute(
                 &prepared_queries.insert_user,
                 (
-                    user_id.clone(),
+                    user_guid.clone(),
                     user_input.name.clone(),
                     user_input.email.clone(),
                     user_input.pronouns.clone(),
@@ -58,7 +58,7 @@ pub async fn create_user(
     }
 
     Ok(User {
-        id: user_id,
+        guid: user_guid,
         name: user_input.name,
         email: user_input.email,
         pronouns: user_input.pronouns,
@@ -66,21 +66,21 @@ pub async fn create_user(
     })
 }
 
-pub async fn get_user_by_id(
+pub async fn get_user_by_guid(
     session: Arc<Session>,
     prepared_queries: Arc<EntityQueries>,
-    id: String,
+    guid: Uuid,
 ) -> Result<User, Error> {
     let result = session
-        .execute(&prepared_queries.get_user_by_id, (id,))
+        .execute(&prepared_queries.get_user_by_guid, (guid,))
         .await?;
 
     if let Some(rows) = result.rows {
-        for row in rows.into_typed::<(String, String, String, String, String)>() {
-            let (id, name, email, class_year, pronouns) = row?;
+        for row in rows.into_typed::<(Uuid, String, String, String, String)>() {
+            let (guid, name, email, class_year, pronouns) = row?;
 
             return Ok(User {
-                id,
+                guid,
                 name,
                 email,
                 class_year,
@@ -97,18 +97,18 @@ pub async fn create_rogue(
     prepared_queries: Arc<EntityQueries>,
     rogue_input: CreateRogueInput,
 ) -> Result<Rogue, Error> {
-    let rogue_id = Uuid::new_v4();
+    let rogue_guid = Uuid::new_v4();
 
     session
         .execute(
             &prepared_queries.insert_rogue,
-            (rogue_id.to_string(), rogue_input.email.clone()),
+            (rogue_guid.to_string(), rogue_input.email.clone()),
         )
         .await?;
 
     Ok(Rogue {
         email: rogue_input.email.clone(),
-        id: rogue_id.to_string(),
+        guid: rogue_guid.clone(),
     })
 }
 
@@ -122,10 +122,10 @@ pub async fn get_rogue_by_email(
         .await?;
 
     if let Some(rows) = result.rows {
-        for row in rows.into_typed::<(String, String)>() {
-            let (email, id) = row?;
+        for row in rows.into_typed::<(String, Uuid)>() {
+            let (email, guid) = row?;
 
-            return Ok(Rogue { email, id });
+            return Ok(Rogue { email, guid });
         }
     }
 

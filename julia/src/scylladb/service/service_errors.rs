@@ -1,6 +1,6 @@
 use scylla::transport::errors::QueryError;
 use thiserror::Error;
-use crate::db::service::service_errors::Error::DatabaseError;
+use crate::scylladb::service::service_errors::Error::DatabaseError;
 
 #[derive(Debug, Error)]
 pub enum Error {

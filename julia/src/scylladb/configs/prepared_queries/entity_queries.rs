@@ -1,4 +1,4 @@
-use crate::db::configs::prepared_queries::utility::PreparedQueries;
+use crate::scylladb::configs::prepared_queries::utility::PreparedQueries;
 use anyhow::Result;
 use async_trait::async_trait;
 use scylla::{prepared_statement::PreparedStatement, Session};
@@ -9,7 +9,7 @@ use tracing::info;
 #[derive(Clone)]
 pub struct EntityQueries {
     pub insert_user: PreparedStatement,
-    pub get_user_by_id: PreparedStatement,
+    pub get_user_by_guid: PreparedStatement,
     pub insert_rogue: PreparedStatement,
     pub delete_rogue: PreparedStatement,
     pub get_rogue_by_email: PreparedStatement,
@@ -21,17 +21,17 @@ impl PreparedQueries for EntityQueries {
         info!("Preparing entity queries");
 
         let insert_user = session
-            .prepare("INSERT INTO julia.users (id, name, email, class_year, pronouns) VALUES (?, ?, ?, ?, ?)")
+            .prepare("INSERT INTO julia.users (guid, name, email, class_year, pronouns) VALUES (?, ?, ?, ?, ?)")
             .await?;
         info!("Insert user query set");
 
-        let get_user_by_id = session
-            .prepare("SELECT * FROM julia.users WHERE id = ?")
+        let get_user_by_guid = session
+            .prepare("SELECT * FROM julia.users WHERE guid = ?")
             .await?;
-        info!("Get user by id set");
+        info!("Get user by guid set");
 
         let insert_rogue = session
-            .prepare("INSERT INTO julia.rogues (id, email) VALUES (?, ?)")
+            .prepare("INSERT INTO julia.rogues (guid, email) VALUES (?, ?)")
             .await?;
         info!("Insert rogue query set");
 
@@ -47,7 +47,7 @@ impl PreparedQueries for EntityQueries {
 
         Ok(EntityQueries {
             insert_user,
-            get_user_by_id,
+            get_user_by_guid,
             insert_rogue,
             get_rogue_by_email,
             delete_rogue,

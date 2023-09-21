@@ -1,15 +1,15 @@
-use crate::db::datatype::entity_type::{CreateRogueInput, CreateUserInput, Rogue, User};
-use crate::db::configs::prepared_queries::entity_queries::EntityQueries;
-use crate::db::service::entity::{
-    create_rogue, create_user, get_rogue_by_email, get_user_by_id,
+use crate::scylladb::datatype::entity_type::{CreateRogueInput, CreateUserInput, Rogue, User};
+use crate::scylladb::configs::prepared_queries::entity_queries::EntityQueries;
+use crate::scylladb::service::entity::{
+    create_rogue, create_user, get_rogue_by_email, get_user_by_guid,
 };
 use scylla::Session;
 use serde::Serialize;
 use std::sync::Arc;
 use warp::http::StatusCode;
 use warp::Filter;
-use crate::api::api_errors::{ApiError, handle_rejection, map_error_to_api_error};
-
+use crate::api::api_errors::{handle_rejection, map_error_to_api_error};
+use uuid::Uuid;
 
 
 
@@ -114,12 +114,12 @@ pub fn get_user_route(
     session: Arc<Session>,
     prepared_queries: Arc<EntityQueries>,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
-    warp::path!("get_user_by_id" / String)
+    warp::path!("get_user_by_guid" / Uuid)
         .and(warp::get())
         .and(with_session(session))
         .and(with_prepared_queries(prepared_queries))
-        .and_then(|id, session, prepared_queries| {
-            handle_get_user_by_id(session, prepared_queries, id)
+        .and_then(|guid, session, prepared_queries| {
+            handle_get_user_by_guid(session, prepared_queries, guid)
         })
 }
 
@@ -136,12 +136,12 @@ pub fn get_rogue_route(
         })
 }
 
-async fn handle_get_user_by_id(
+async fn handle_get_user_by_guid(
     session: Arc<Session>,
     prepared_queries: Arc<EntityQueries>,
-    id: String,
+    guid: Uuid,
 ) -> Result<impl warp::Reply, warp::Rejection> {
-    match get_user_by_id(session.clone(), prepared_queries.clone(), id).await {
+    match get_user_by_guid(session.clone(), prepared_queries.clone(), guid).await {
         Ok(user) => Ok(warp::reply::json(&user)),
         Err(e) => {
             eprintln!("Error occurred while fetching user: {:?}", e);

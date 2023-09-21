@@ -1,31 +1,35 @@
-use crate::db::datatype::bond_type::{Bond, CreateBondInput};
-use crate::db::configs::prepared_queries::bond_queries::BondQueries;
+use crate::scylladb::datatype::bond_type::{Bond, CreateBondInput};
+use crate::scylladb::configs::prepared_queries::bond_queries::BondQueries;
 use chrono::{DateTime, Utc};
 use scylla::{IntoTypedRows, Session};
 use std::sync::Arc;
 use scylla::batch::Batch;
 use uuid::Uuid;
-use crate::db::service::service_errors::Error;
+use crate::scylladb::service::service_errors::Error;
 
 async fn check_existing_bond(
     session: Arc<Session>,
     prepared_queries: Arc<BondQueries>,
-    creator_id: String,
-    crush_id: String,
+    creator_guid: Uuid,
+    crush_guid: Uuid,
 ) -> Result<Option<Bond>, Error> {
-    let bond_id = crush_id.to_string() + &creator_id.to_string();
+    let bond_guid = format!(
+        "{}{}",
+        crush_guid.to_string(),
+        creator_guid.to_string(),
+    );
 
     let result = session
-        .execute(&prepared_queries.check_existing_bond, (bond_id,))
+        .execute(&prepared_queries.check_existing_bond, (bond_guid,))
         .await?;
 
     if let Some(rows) = result.rows {
-        for row in rows.into_typed::<(String, String, String, i32, i32, String, String)>() {
-            let (id, creator_id, crush_id, bond_type, game_status, created_at, updated_at) = row?;
+        for row in rows.into_typed::<(String, Uuid, Uuid, i32, i32, String, String)>() {
+            let (guid, creator_guid, crush_guid, bond_type, game_status, created_at, updated_at) = row?;
             return Ok(Some(Bond {
-                id,
-                creator_id,
-                crush_id,
+                guid,
+                creator_guid,
+                crush_guid,
                 bond_type,
                 game_status,
                 created_at,
@@ -45,8 +49,8 @@ pub async fn form_bond(
     let existing_bond = check_existing_bond(
         session.clone(),
         prepared_queries.clone(),
-        bond_input.creator_id.clone(),
-        bond_input.crush_id.clone(),
+        bond_input.creator_guid.clone(),
+        bond_input.crush_guid.clone(),
     )
     .await?;
 
@@ -63,7 +67,7 @@ pub async fn form_bond(
             (
                 1,
                 updated_at.to_string(),
-                existing_bond.id.clone()
+                existing_bond.guid.clone()
             ),
         );
 
@@ -74,15 +78,20 @@ pub async fn form_bond(
 
         return_bond = existing_bond;
     } else {
-        let bond_id = Uuid::new_v4();
+        let bond_guid = format!(
+            "{}{}",
+            bond_input.creator_guid.to_string(),
+            bond_input.crush_guid.to_string(),
+        );
+
         let created_at: DateTime<Utc> = Utc::now();
         session
             .execute(
                 &prepared_queries.form_bond,
                 (
-                    bond_id.to_string(),
-                    bond_input.creator_id.clone(),
-                    bond_input.crush_id.clone(),
+                    bond_guid.to_string(),
+                    bond_input.creator_guid.clone(),
+                    bond_input.crush_guid.clone(),
                     bond_input.bond_type,
                     bond_input.game_status,
                     created_at.to_string(),
@@ -92,9 +101,9 @@ pub async fn form_bond(
             .await?;
 
         return_bond = Bond {
-            id: bond_id.to_string(),
-            creator_id: bond_input.creator_id,
-            crush_id: bond_input.crush_id,
+            guid: bond_guid,
+            creator_guid: bond_input.creator_guid,
+            crush_guid: bond_input.crush_guid,
             bond_type: bond_input.bond_type,
             game_status: bond_input.game_status,
             created_at: created_at.to_string(),
@@ -105,28 +114,28 @@ pub async fn form_bond(
     return Ok(return_bond);
 }
 
-pub async fn get_bonds_by_user_id(
+pub async fn get_bonds_by_user_guid(
     session: Arc<Session>,
     prepared_queries: Arc<BondQueries>,
-    user_id: String,
+    user_guid: Uuid,
 ) -> Result<Vec<Bond>, Error> {
     let creator_result = session
         .execute(
             &prepared_queries.fetch_user_creator_bonds,
-            (user_id.clone(),),
+            (user_guid.clone(),),
         )
         .await?;
 
     let mut bonds: Vec<Bond> = Vec::new();
 
     if let Some(rows) = creator_result.rows {
-        for row in rows.into_typed::<(String, String, String, i32, i32, String, String)>() {
-            let (id, creator_id, crush_id, bond_type, game_status, created_at, updated_at) = row?;
+        for row in rows.into_typed::<(String, Uuid, Uuid, i32, i32, String, String)>() {
+            let (guid, creator_guid, crush_guid, bond_type, game_status, created_at, updated_at) = row?;
 
             let bond = Bond {
-                id,
-                creator_id,
-                crush_id,
+                guid,
+                creator_guid,
+                crush_guid,
                 bond_type,
                 game_status,
                 created_at,

@@ -1,4 +1,4 @@
-use crate::db::configs::prepared_queries::utility::PreparedQueries;
+use crate::scylladb::configs::prepared_queries::utility::PreparedQueries;
 use anyhow::Result;
 use async_trait::async_trait;
 use scylla::prepared_statement::PreparedStatement;
@@ -23,32 +23,32 @@ impl PreparedQueries for BondQueries {
         info!("Preparing bond queries...");
 
         let form_bond = session
-            .prepare("INSERT INTO julia.bonds (id, creator_id, crush_id, bond_type, game_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
+            .prepare("INSERT INTO julia.bonds (guid, creator_guid, crush_guid, bond_type, game_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
             .await?;
         info!("Form bond query set");
 
         let check_existing_bond = session
-            .prepare("SELECT * FROM julia.bonds WHERE id = ?")
+            .prepare("SELECT * FROM julia.bonds WHERE guid = ?")
             .await?;
         info!("Check existing bond query set");
 
         let fetch_user_creator_bonds = session
-            .prepare("SELECT * FROM julia.bonds WHERE creator_id = ?")
+            .prepare("SELECT * FROM julia.bonds WHERE creator_guid = ?")
             .await?;
         info!("Fetch user creator bond query set");
 
         let fetch_user_crush_bonds = session
-            .prepare("SELECT * FROM julia.bonds WHERE crush_id = ?")
+            .prepare("SELECT * FROM julia.bonds WHERE crush_guid = ?")
             .await?;
         info!("Fetch user crush bond query set");
 
         let delete_bond = session
-            .prepare("DELETE FROM julia.bonds WHERE id = ?")
+            .prepare("DELETE FROM julia.bonds WHERE guid = ?")
             .await?;
         info!("Delete bond query set");
 
         let update_bond = session
-            .prepare("UPDATE julia.bonds SET game_status = ?, updated_at = ? WHERE id = ?")
+            .prepare("UPDATE julia.bonds SET game_status = ?, updated_at = ? WHERE guid = ?")
             .await?;
         info!("Update bond query set");
 

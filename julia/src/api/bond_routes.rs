@@ -1,8 +1,9 @@
-use crate::db::datatype::bond_type::CreateBondInput;
-use crate::db::configs::prepared_queries::bond_queries::BondQueries;
-use crate::db::service::bond::{form_bond, get_bonds_by_user_id};
+use crate::scylladb::datatype::bond_type::CreateBondInput;
+use crate::scylladb::configs::prepared_queries::bond_queries::BondQueries;
+use crate::scylladb::service::bond::{form_bond, get_bonds_by_user_guid};
 use scylla::Session;
 use std::sync::Arc;
+use uuid::Uuid;
 use warp::http::StatusCode;
 use warp::Filter;
 use crate::api::api_errors::{handle_rejection, map_error_to_api_error};
@@ -13,7 +14,7 @@ pub fn routes(
     prepared_queries: Arc<BondQueries>,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     let create_bond = create_bond_route(session.clone(), prepared_queries.clone());
-    let get_user_bonds = get_bonds_by_user_id_route(session.clone(), prepared_queries.clone());
+    let get_user_bonds = get_bonds_by_user_guid_route(session.clone(), prepared_queries.clone());
 
     let all_route = create_bond.or(get_user_bonds);
     all_route.recover(handle_rejection)
@@ -51,25 +52,25 @@ async fn handle_create_bond(
     }
 }
 
-pub fn get_bonds_by_user_id_route(
+pub fn get_bonds_by_user_guid_route(
     session: Arc<Session>,
     prepared_queries: Arc<BondQueries>,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
-    warp::path!("get_user_bonds" / String)
+    warp::path!("get_user_bonds" / Uuid)
         .and(warp::get())
         .and(with_session(session))
         .and(with_prepared_queries(prepared_queries))
-        .and_then(|id, session, prepared_queries| {
-            handle_get_bonds_by_user_id(session, prepared_queries, id)
+        .and_then(|guid, session, prepared_queries| {
+            handle_get_bonds_by_user_guid(session, prepared_queries, guid)
         })
 }
 
-async fn handle_get_bonds_by_user_id(
+async fn handle_get_bonds_by_user_guid(
     session: Arc<Session>,
     prepared_queries: Arc<BondQueries>,
-    id: String,
+    guid: Uuid,
 ) -> Result<impl warp::Reply, warp::Rejection> {
-    match get_bonds_by_user_id(session.clone(), prepared_queries.clone(), id).await {
+    match get_bonds_by_user_guid(session.clone(), prepared_queries.clone(), guid).await {
         Ok(user) => Ok(warp::reply::json(&user)),
         Err(e) => {
             eprintln!("Error occurred while fetching user: {:?}", e);

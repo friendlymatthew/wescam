@@ -1,25 +1,42 @@
 extern crate warp;
-use db::configs::{
+
+use std::env;
+use scylladb::configs::{
     prepared_queries::bond_queries, prepared_queries::entity_queries, prepared_queries::utility,
     scylla_config,
 };
 use std::error::Error;
+use pulsar::{Pulsar, TokioExecutor};
 use warp::Filter;
 
-#[path = "./db/mod.rs"]
-mod db;
+#[path = "scylladb/mod.rs"]
+mod scylladb;
 
 #[path = "./api/mod.rs"]
 mod api;
+
+#[path = "pulsar_service/mod.rs"]
+mod pulsar_service;
+
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     tracing_subscriber::fmt::init();
 
-    let uri = std::env::var("SCYLLA_URI").unwrap_or_else(|_| "127.0.0.1:9042".to_string());
+    let scylla_uri = env::var("SCYLLA_URI").unwrap_or_else(|_| "127.0.0.1:9042".to_string());
+    let pulsar_addr = env::var("PULSAR_ADDRESS")
+        .ok()
+        .unwrap_or_else(|| "pulsar://127.0.0.1:6650".to_string());
 
-    let scylla_service = scylla_config::ScyllaConfig::create_session(uri).await?;
+
+    let scylla_service = scylla_config::ScyllaConfig::create_session(scylla_uri).await?;
     scylla_service.populate_table().await?;
+
+    /*
+    let pulsar_service = Pulsar::builder(pulsar_addr, TokioExecutor)
+        .build()
+        .await?;
+     */
 
     let prepared_entity_queries = utility::wrap_prepared_queries::<entity_queries::EntityQueries>(
         scylla_service.session.clone(),
