@@ -10,6 +10,8 @@ pub async fn initialize(session: &Session) -> Result<(), Box<dyn Error>> {
         ("generate_bonds", "CREATE TABLE IF NOT EXISTS julia.bonds (guid uuid PRIMARY KEY, creator_guid uuid, crush_guid uuid, bond_type text, game_status text, created_at timestamp, updated_at timestamp);"),
         ("bond_creator_index", "CREATE INDEX on julia.bonds (creator_guid);"),
         ("bond_crush_index", "CREATE INDEX on julia.bonds (crush_guid);"),
+        ("generate_keyspace", "CREATE KEYSPACE IF NOT EXISTS miguel WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };"),
+        ("generate_messages", "CREATE TABLE IF NOT EXISTS miguel.messages(guid uuid , bond_guid uuid, sender_guid uuid, recipient_guid uuid, content text, status text, PRIMARY KEY (bond_guid, guid));")
     ];
 
     for &(title, current_query) in &queries {
@@ -25,6 +27,7 @@ pub async fn drop(session: &Session) -> Result<(), Box<dyn Error>> {
         ("rogue_table", "DROP TABLE IF EXISTS julia.rogues"),
         ("users_table", "DROP TABLE IF EXISTS julia.users"),
         ("bonds_table", "DROP TABLE IF EXISTS julia.bonds"),
+        ("messages_table", "DROP TABLE IF EXISTS miguel.messages"),
     ];
 
     for &(drop_action, drop_query) in &drop_actions {

@@ -1,0 +1,6 @@
+configs:
+  roots: "pulsar://127.0.0.1:6650"
+  keyspace: "miguel"
+  columnFamily: "messages"
+  keyname: "guid"
+  columnName: "bond_guid,sender_guid,recipient_guid,content,status"

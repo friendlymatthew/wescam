@@ -32,11 +32,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let scylla_service = scylla_config::ScyllaConfig::create_session(scylla_uri).await?;
     scylla_service.populate_table().await?;
 
-    /*
-    let pulsar_service = Pulsar::builder(pulsar_addr, TokioExecutor)
+     let pulsar_service = Pulsar::builder(pulsar_addr, TokioExecutor)
         .build()
         .await?;
-     */
 
     let prepared_entity_queries = utility::wrap_prepared_queries::<entity_queries::EntityQueries>(
         scylla_service.session.clone(),

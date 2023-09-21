@@ -1,0 +1,17 @@
+#!/bin/bash
+TODO! MAKE THIS INTO A SCRIPT AND INJECT INTO DOCKER-COMPOSE spec. broker service
+
+
+bin/pulsar-admin namespaces create public/default
+
+
+bin/pulsar-admin topics create persistent://public/default/bondmessage
+
+#create sink
+bin/pulsar-admin sinks create \
+  --tenant public \
+  --namespace public \
+  --name "message_sink" \
+  --sink-type cassandra \
+  --sink-config-file ./configs/message_sink_config.yml \
+  --inputs bondmessage
