@@ -1,6 +1,6 @@
 use scylla::transport::errors::QueryError;
 use thiserror::Error;
-use crate::scylladb::service::service_errors::Error::DatabaseError;
+use crate::scylladb::service::service_errors::Error::{DatabaseError, PulsarError};
 
 #[derive(Debug, Error)]
 pub enum Error {
@@ -9,6 +9,9 @@ pub enum Error {
 
     #[error("Query no match")]
     NotFound,
+
+    #[error("Pulsar Error {0}")]
+    PulsarError(String),
 }
 
 impl From<QueryError> for Error {
@@ -23,3 +26,8 @@ impl From<scylla::cql_to_rust::FromRowError> for Error {
     }
 }
 
+impl From<pulsar::Error> for Error {
+    fn from(err: pulsar::Error) -> Error {
+        PulsarError(format!("Pulsar error arose: {}", err))
+    }
+}

@@ -1,2 +1,2 @@
-pub mod msg_producer;
-pub mod msg_consumer;
+pub mod pulsar_producer;
+pub mod pulsar_consumer;

@@ -6,6 +6,7 @@ use scylladb::configs::{
     scylla_config,
 };
 use std::error::Error;
+use std::sync::Arc;
 use pulsar::{Pulsar, TokioExecutor};
 use warp::Filter;
 
@@ -32,27 +33,29 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let scylla_service = scylla_config::ScyllaConfig::create_session(scylla_uri).await?;
     scylla_service.populate_table().await?;
 
-     let pulsar_service = Pulsar::builder(pulsar_addr, TokioExecutor)
+     let pulsar_service = Arc::new(Pulsar::builder(pulsar_addr, TokioExecutor)
         .build()
-        .await?;
+        .await
+         .expect("Failed to create Pulsar Service"));
 
     let prepared_entity_queries = utility::wrap_prepared_queries::<entity_queries::EntityQueries>(
         scylla_service.session.clone(),
     )
     .await?;
 
-    let entity_route = api::entity_routes::routes(
-        scylla_service.session.clone(),
-        prepared_entity_queries.clone(),
-    );
-
     let prepared_bond_queries =
         utility::wrap_prepared_queries::<bond_queries::BondQueries>(scylla_service.session.clone())
             .await?;
 
-    let bond_route = api::bond_routes::routes(
+    let entity_route = api::routes::entity_route::routes(
+        scylla_service.session.clone(),
+        prepared_entity_queries.clone(),
+    );
+
+    let bond_route = api::routes::bond_route::routes(
         scylla_service.session.clone(),
         prepared_bond_queries.clone(),
+        pulsar_service.clone(),
     );
 
     let health_route = warp::path!("health").map(|| format!("Server is healthy"));

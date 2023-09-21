@@ -3,8 +3,10 @@ use crate::scylladb::configs::prepared_queries::bond_queries::BondQueries;
 use chrono::{DateTime, Utc};
 use scylla::{IntoTypedRows, Session};
 use std::sync::Arc;
+use pulsar::{producer, Pulsar, TokioExecutor};
 use scylla::batch::Batch;
 use uuid::Uuid;
+use crate::pulsar_service::pulsar_producer::PulsarProducer;
 use crate::scylladb::service::service_errors::Error;
 
 async fn check_existing_bond(
@@ -44,6 +46,7 @@ async fn check_existing_bond(
 pub async fn form_bond(
     session: Arc<Session>,
     prepared_queries: Arc<BondQueries>,
+    pulsar_service: Arc<Pulsar<TokioExecutor>>,
     bond_input: CreateBondInput,
 ) -> Result<Bond, Error> {
     let existing_bond = check_existing_bond(
@@ -59,6 +62,15 @@ pub async fn form_bond(
     let return_bond: Bond;
 
     if let Some(mut existing_bond) = existing_bond {
+        let mut producer = pulsar_service
+            .producer()
+            .with_topic("persistent://public/default/mutualbonds")
+            .with_options(producer::ProducerOptions {
+                ..Default::default()
+            })
+            .build()
+            .await?;
+
 
         let mut batch: Batch = Batch::default();
 
@@ -76,7 +88,10 @@ pub async fn form_bond(
         existing_bond.game_status = 1;
         existing_bond.updated_at = updated_at.to_string();
 
-        return_bond = existing_bond;
+        producer
+            .send(existing_bond.clone()).await?.await.unwrap();
+
+        return_bond = existing_bond.clone();
     } else {
         let bond_guid = format!(
             "{}{}",

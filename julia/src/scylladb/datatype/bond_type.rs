@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct CreateBondInput {
     pub creator_guid: Uuid,
     pub crush_guid: Uuid,
@@ -10,7 +10,7 @@ pub struct CreateBondInput {
     pub game_status: i32, // 0 - guess, 1 - match
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Bond {
     pub guid: String,
     pub creator_guid: Uuid,
