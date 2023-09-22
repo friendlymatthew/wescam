@@ -4,8 +4,7 @@ TODO! MAKE THIS INTO A SCRIPT AND INJECT INTO DOCKER-COMPOSE spec. broker servic
 
 bin/pulsar-admin namespaces create public/default
 
-
-bin/pulsar-admin topics create persistent://public/default/bondmessage
+bin/pulsar-admin topics create-partitioned-topic persistent://public/default/bondmessage -p 100
 
 #create sink
 bin/pulsar-admin sinks create \

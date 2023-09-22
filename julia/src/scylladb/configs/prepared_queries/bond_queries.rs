@@ -22,34 +22,40 @@ impl PreparedQueries for BondQueries {
     async fn new(session: Arc<Session>) -> Result<Self, Box<dyn Error>> {
         info!("Preparing bond queries...");
 
-        let form_bond = session
+        let mut form_bond = session
             .prepare("INSERT INTO julia.bonds (guid, creator_guid, crush_guid, bond_type, game_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
             .await?;
+        form_bond.set_tracing(true);
         info!("Form bond query set");
 
-        let check_existing_bond = session
+        let mut check_existing_bond = session
             .prepare("SELECT * FROM julia.bonds WHERE guid = ?")
             .await?;
+        check_existing_bond.set_tracing(true);
         info!("Check existing bond query set");
 
-        let fetch_user_creator_bonds = session
+        let mut fetch_user_creator_bonds = session
             .prepare("SELECT * FROM julia.bonds WHERE creator_guid = ?")
             .await?;
+        fetch_user_creator_bonds.set_tracing(true);
         info!("Fetch user creator bond query set");
 
-        let fetch_user_crush_bonds = session
+        let mut fetch_user_crush_bonds = session
             .prepare("SELECT * FROM julia.bonds WHERE crush_guid = ?")
             .await?;
+        fetch_user_crush_bonds.set_tracing(true);
         info!("Fetch user crush bond query set");
 
-        let delete_bond = session
+        let mut delete_bond = session
             .prepare("DELETE FROM julia.bonds WHERE guid = ?")
             .await?;
+        delete_bond.set_tracing(true);
         info!("Delete bond query set");
 
-        let update_bond = session
+        let mut update_bond = session
             .prepare("UPDATE julia.bonds SET game_status = ?, updated_at = ? WHERE guid = ?")
             .await?;
+        update_bond.set_tracing(true);
         info!("Update bond query set");
 
         Ok(BondQueries {

@@ -3,6 +3,14 @@ networks:
   pulsar:
     driver: bridge
 services:
+  redis:
+    image: "redis:latest"
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: [ "redis-server", "--appendonly", "yes" ]
   scylla:
     image: scylladb/scylla
     container_name: scylla
@@ -110,3 +118,4 @@ services:
 
 volumes:
   scylla-data:
+  redis-data:

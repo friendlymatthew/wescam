@@ -20,29 +20,34 @@ impl PreparedQueries for EntityQueries {
     async fn new(session: Arc<Session>) -> Result<Self, Box<dyn Error>> {
         info!("Preparing entity queries");
 
-        let insert_user = session
+        let mut insert_user = session
             .prepare("INSERT INTO julia.users (guid, name, email, class_year, pronouns) VALUES (?, ?, ?, ?, ?)")
             .await?;
+        insert_user.set_tracing(true);
         info!("Insert user query set");
 
-        let get_user_by_guid = session
+        let mut get_user_by_guid = session
             .prepare("SELECT * FROM julia.users WHERE guid = ?")
             .await?;
+        get_user_by_guid.set_tracing(true);
         info!("Get user by guid set");
 
-        let insert_rogue = session
+        let mut insert_rogue = session
             .prepare("INSERT INTO julia.rogues (guid, email) VALUES (?, ?)")
             .await?;
+        insert_rogue.set_tracing(true);
         info!("Insert rogue query set");
 
-        let get_rogue_by_email = session
+        let mut get_rogue_by_email = session
             .prepare("SELECT * FROM julia.rogues WHERE email = ?")
             .await?;
+        get_rogue_by_email.set_tracing(true);
         info!("Get rogue user by email query set");
 
-        let delete_rogue = session
+        let mut delete_rogue = session
             .prepare("DELETE FROM julia.rogues WHERE email = ?")
             .await?;
+        delete_rogue.set_tracing(true);
         info!("Delete rogue user query set");
 
         Ok(EntityQueries {

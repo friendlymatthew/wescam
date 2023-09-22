@@ -10,6 +10,9 @@ pub enum Error {
     #[error("Query no match")]
     NotFound,
 
+    #[error("Tracing error")]
+    TracingError,
+
     #[error("Pulsar Error {0}")]
     PulsarError(String),
 }

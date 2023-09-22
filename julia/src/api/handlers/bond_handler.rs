@@ -4,7 +4,6 @@ use scylla::Session;
 use uuid::Uuid;
 use warp::http::StatusCode;
 use crate::api::api_errors::map_error_to_api_error;
-use crate::pulsar_service::pulsar_producer::PulsarProducer;
 use crate::scylladb::configs::prepared_queries::bond_queries::BondQueries;
 use crate::scylladb::datatype::bond_type::CreateBondInput;
 use crate::scylladb::service::bond::{form_bond, get_bonds_by_user_guid};

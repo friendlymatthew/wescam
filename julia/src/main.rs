@@ -1,10 +1,12 @@
 extern crate warp;
+extern crate redis;
 
 use std::env;
 use scylladb::configs::{
     prepared_queries::bond_queries, prepared_queries::entity_queries, prepared_queries::utility,
     scylla_config,
 };
+
 use std::error::Error;
 use std::sync::Arc;
 use pulsar::{Pulsar, TokioExecutor};
@@ -19,6 +21,8 @@ mod api;
 #[path = "pulsar_service/mod.rs"]
 mod pulsar_service;
 
+#[path = "chat/mod.rs"]
+mod chat;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -37,6 +41,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .build()
         .await
          .expect("Failed to create Pulsar Service"));
+
+    // TODO! implement redis cache
+    let redis_cache = redis::Client::open("redis://127.0.0.1/")?;
 
     let prepared_entity_queries = utility::wrap_prepared_queries::<entity_queries::EntityQueries>(
         scylla_service.session.clone(),

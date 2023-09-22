@@ -5,9 +5,10 @@ use scylla::{IntoTypedRows, Session};
 use std::sync::Arc;
 use pulsar::{producer, Pulsar, TokioExecutor};
 use scylla::batch::Batch;
+use tracing::{warn};
 use uuid::Uuid;
-use crate::pulsar_service::pulsar_producer::PulsarProducer;
 use crate::scylladb::service::service_errors::Error;
+use crate::scylladb::service::tracing_utility::handle_tracing;
 
 async fn check_existing_bond(
     session: Arc<Session>,
@@ -24,6 +25,14 @@ async fn check_existing_bond(
     let result = session
         .execute(&prepared_queries.check_existing_bond, (bond_guid,))
         .await?;
+
+    if let Err(e) = handle_tracing(
+        session.clone(),
+        result.tracing_id,
+        format!("Check Existing Bond")
+    ).await {
+        warn!("Tracing failed to execute {:?}", e)
+    }
 
     if let Some(rows) = result.rows {
         for row in rows.into_typed::<(String, Uuid, Uuid, i32, i32, String, String)>() {
@@ -75,6 +84,9 @@ pub async fn form_bond(
         let mut batch: Batch = Batch::default();
 
         batch.append_statement(prepared_queries.update_bond.clone());
+
+        &batch.set_tracing(true);
+
         let batch_value =  (
             (
                 1,
@@ -83,7 +95,15 @@ pub async fn form_bond(
             ),
         );
 
-        session.batch(&batch, batch_value).await?;
+        let result = session.batch(&batch, batch_value).await?;
+
+        if let Err(e) = handle_tracing(
+            session.clone(),
+            result.tracing_id,
+            format!("Form existing bond")
+        ).await {
+            warn!("Tracing failed to execute {:?}", e);
+        }
 
         existing_bond.game_status = 1;
         existing_bond.updated_at = updated_at.to_string();
@@ -100,7 +120,7 @@ pub async fn form_bond(
         );
 
         let created_at: DateTime<Utc> = Utc::now();
-        session
+        let result = session
             .execute(
                 &prepared_queries.form_bond,
                 (
@@ -114,6 +134,14 @@ pub async fn form_bond(
                 ),
             )
             .await?;
+
+        if let Err(e) = handle_tracing(
+            session.clone(),
+            result.tracing_id,
+            format!("Form unique bond")
+        ).await {
+            warn!("Tracing failed to execute {:?}", e);
+        }
 
         return_bond = Bond {
             guid: bond_guid,
@@ -140,6 +168,14 @@ pub async fn get_bonds_by_user_guid(
             (user_guid.clone(),),
         )
         .await?;
+
+    if let Err(e) = handle_tracing(
+        session.clone(),
+        creator_result.tracing_id,
+        format!("Get bonds by user guid")
+    ).await {
+        warn!("Tracing failed to execute {:?}", e);
+    }
 
     let mut bonds: Vec<Bond> = Vec::new();
 
