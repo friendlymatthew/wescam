@@ -1,4 +1,10 @@
 ## _xyz is an asynchronous chat and web service_
+
+
+![arch.png](..%2Farch.png)
+
+
+
 <a href="https://discord.gg/gt8VTZfn6h" target="_blank">
     <img src="https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord" alt="Join our Discord" width="300"/>
 </a>
