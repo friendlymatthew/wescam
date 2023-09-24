@@ -102,7 +102,7 @@ pub async fn form_bond(
         existing_bond.game_status = 1;
         existing_bond.updated_at = updated_at.to_string();
 
-        producer.send(existing_bond.clone()).await?.await.unwrap();
+        // TODO! BETTER response payload producer.send(existing_bond.clone()).await?.await.unwrap();
 
         return_bond = existing_bond.clone();
     } else {

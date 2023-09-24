@@ -1,22 +1,27 @@
+use crate::chat::forwarder::Presence;
 use crate::scylladb::datatype::bond_type::Bond;
-use crate::scylladb::datatype::message_type::Message as MessageDto;
-use pulsar::producer::Message;
+use crate::scylladb::datatype::message_type::Message;
 use pulsar::{
     producer, producer::Producer, Error as PulsarError, Pulsar, SerializeMessage, TokioExecutor,
 };
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-impl SerializeMessage for MessageDto {
-    fn serialize_message(input: Self) -> Result<producer::Message, PulsarError> {
-        let payload = serde_json::to_vec(&input).map_err(|e| PulsarError::Custom(e.to_string()))?;
-        Ok(producer::Message {
-            payload,
-            ..Default::default()
-        })
-    }
+
+#[derive(Serialize, Deserialize)]
+pub enum DataPayload {
+    Bond(Bond),
+    Message(Message),
+    Presence(Presence),
 }
 
-impl SerializeMessage for Bond {
-    fn serialize_message(input: Self) -> Result<Message, PulsarError> {
+#[derive(Serialize, Deserialize)]
+pub struct TopicPayload {
+    pub msg: String,
+    pub data: DataPayload,
+}
+
+impl SerializeMessage for TopicPayload {
+    fn serialize_message(input: Self) -> Result<producer::Message, PulsarError> {
         let payload = serde_json::to_vec(&input).map_err(|e| PulsarError::Custom(e.to_string()))?;
 
         Ok(producer::Message {

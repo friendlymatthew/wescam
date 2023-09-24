@@ -21,6 +21,18 @@ pub enum Error {
 
     #[error("Redis Error {0}")]
     RedisCacheError(String),
+
+    #[error("Websocket Connection Error")]
+    WsError,
+
+    #[error("Serialization Error")]
+    SerializationError,
+
+    #[error("Parsing Error {0} ")]
+    ParsingError(String),
+
+    #[error("Mutex lock error")]
+MutexError,
 }
 
 impl From<QueryError> for Error {

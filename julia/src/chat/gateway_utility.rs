@@ -4,9 +4,9 @@ use uuid::Uuid;
 
 #[derive(Serialize, Deserialize)]
 pub enum WsTopic {
-    JOIN_ROOM,
-    LEAVE_ROOM,
-    SEND_MESSAGE,
+    JoinRoom,
+    SendMessage,
+    LeaveRoom,
 }
 
 #[derive(Serialize, Deserialize)]

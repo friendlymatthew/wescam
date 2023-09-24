@@ -1,19 +1,20 @@
+extern crate dashmap;
 extern crate redis;
 extern crate warp;
-
+use dashmap::DashMap;
 use scylladb::configs::{
     prepared_queries::bond_queries, prepared_queries::entity_queries, prepared_queries::utility,
     scylla_config,
 };
-use std::collections::HashMap;
 use std::env;
-
 use crate::chat::forwarder::Forwarder;
-use crate::chat::gateway::{create_gateway, user_connected};
+use crate::chat::gateway::{create_gateway};
 use pulsar::{Pulsar, TokioExecutor};
 use std::error::Error;
-use std::sync::Arc;
+use std::sync::{Arc};
+use uuid::Uuid;
 use warp::Filter;
+use crate::chat::route::configure_ws_route;
 
 #[path = "scylladb/mod.rs"]
 mod scylladb;
@@ -26,6 +27,8 @@ mod pulsar_service;
 
 #[path = "chat/mod.rs"]
 mod chat;
+
+type WsMapping = Arc<DashMap<Uuid, tokio::sync::Mutex<warp::ws::WebSocket>>>;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -46,41 +49,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .expect("Failed to create Pulsar Service"),
     );
 
-    // TODO! implement redis cache
     let redis_cache = redis::Client::open("redis://127.0.0.1/")?;
     let forwarder = Forwarder::new(Arc::new(redis_cache)).await?;
 
     let chat_gateway = create_gateway(pulsar_service.clone()).await?;
+    let ws_map: WsMapping = Arc::new(DashMap::new());
+    let ws_route = configure_ws_route(
+        ws_map,
+        Arc::new(chat_gateway)
+    );
 
-    let ws_route = warp::path("chat")
-        .and(warp::ws())
-        .and(warp::query::<HashMap<String, String>>())
-        .map({
-            let chat_gateway = chat_gateway.clone();
-            move |ws: warp::ws::Ws, query_map: HashMap<String, String>| {
-                let user_guid = query_map
-                    .get("guid")
-                    .cloned()
-                    .unwrap_or_else(|| "".to_string());
-
-                ws.on_upgrade({
-                    let msg_producer = chat_gateway.msg_producer.clone();
-                    let presence_producer = chat_gateway.presence_producer.clone();
-
-                    move |socket| {
-                        let user_guid = user_guid.clone();
-                        async move {
-                            let user_connected_fut =
-                                user_connected(msg_producer, presence_producer, socket, user_guid);
-                            let handle = tokio::spawn(user_connected_fut);
-                            if let Err(e) = handle.await {
-                                println!("Failed to execute user_connected: {}", e);
-                            }
-                        }
-                    }
-                })
-            }
-        });
 
     let prepared_entity_queries = utility::wrap_prepared_queries::<entity_queries::EntityQueries>(
         scylla_service.session.clone(),
