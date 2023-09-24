@@ -1,7 +1,9 @@
-use std::sync::Arc;
-use pulsar::{Consumer, Error as PulsarError, DeserializeMessage, Payload, Pulsar, TokioExecutor, SubType};
 use crate::scylladb::datatype::bond_type::Bond;
 use crate::scylladb::datatype::message_type::Message as MessageDto;
+use pulsar::{
+    Consumer, DeserializeMessage, Error as PulsarError, Payload, Pulsar, SubType, TokioExecutor,
+};
+use std::sync::Arc;
 
 impl DeserializeMessage for MessageDto {
     type Output = Result<MessageDto, serde_json::Error>;
@@ -19,11 +21,14 @@ impl DeserializeMessage for Bond {
     }
 }
 
-pub struct PulsarConsumer {
-}
+pub struct PulsarConsumer {}
 
 impl PulsarConsumer {
-    async fn new(name: String, pulsar_service: Arc<Pulsar<TokioExecutor>>, topic: String) -> Result<Consumer<MessageDto, TokioExecutor>, PulsarError> {
+    async fn new(
+        name: String,
+        pulsar_service: Arc<Pulsar<TokioExecutor>>,
+        topic: String,
+    ) -> Result<Consumer<MessageDto, TokioExecutor>, PulsarError> {
         let consumer = pulsar_service
             .consumer()
             .with_topic(topic)

@@ -8,8 +8,6 @@ pub struct ScyllaConfig {
 }
 
 impl ScyllaConfig {
-
-
     pub async fn create_session(uri: String) -> Result<Self, Box<dyn std::error::Error>> {
         info!("Connecting to {}", uri);
 

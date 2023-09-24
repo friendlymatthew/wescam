@@ -2,12 +2,11 @@ use crate::scylladb::configs::prepared_queries::entity_queries::EntityQueries;
 use crate::scylladb::datatype::entity_type::{CreateRogueInput, CreateUserInput, Rogue, User};
 use crate::scylladb::service::service_errors::Error;
 use crate::scylladb::service::service_errors::Error::NotFound;
-use scylla::tracing::TracingInfo;
+use crate::scylladb::service::tracing_utility::handle_tracing;
 use scylla::{batch::Batch, IntoTypedRows, Session};
 use std::sync::Arc;
-use tracing::{info, warn};
+use tracing::warn;
 use uuid::Uuid;
-use crate::scylladb::service::tracing_utility::handle_tracing;
 
 pub async fn create_user(
     session: Arc<Session>,
@@ -51,10 +50,11 @@ pub async fn create_user(
             session.clone(),
             result.tracing_id,
             format!("User creation from rogue"),
-        ).await {
+        )
+        .await
+        {
             warn!("Tracing failed to execute {:?}", e);
         }
-
     } else {
         let result = session
             .execute(
@@ -69,15 +69,11 @@ pub async fn create_user(
             )
             .await?;
 
-
-        if let Err(e) = handle_tracing(
-            session.clone(),
-       result.tracing_id,
-            format!("User creation"),
-        ).await {
+        if let Err(e) =
+            handle_tracing(session.clone(), result.tracing_id, format!("User creation")).await
+        {
             warn!("Tracing failed to execute {:?}", e);
         }
-
     }
 
     Ok(User {
@@ -101,8 +97,10 @@ pub async fn get_user_by_guid(
     if let Err(e) = handle_tracing(
         session.clone(),
         result.tracing_id,
-        format!("Get user by guid")
-    ).await {
+        format!("Get user by guid"),
+    )
+    .await
+    {
         warn!("Tracing failed to execute {:?}", e);
     }
 
@@ -137,11 +135,9 @@ pub async fn create_rogue(
         )
         .await?;
 
-    if let Err(e) = handle_tracing(
-        session.clone(),
-        result.tracing_id,
-        format!("Create Rogue")
-    ).await {
+    if let Err(e) =
+        handle_tracing(session.clone(), result.tracing_id, format!("Create Rogue")).await
+    {
         warn!("Tracing failed to execute {:?}", e);
     }
 
@@ -163,11 +159,12 @@ pub async fn get_rogue_by_email(
     if let Err(e) = handle_tracing(
         session.clone(),
         result.tracing_id,
-        format!("Get rogue by email")
-    ).await {
+        format!("Get rogue by email"),
+    )
+    .await
+    {
         warn!("Tracing failed to execute {:?}", e);
     }
-
 
     if let Some(rows) = result.rows {
         for row in rows.into_typed::<(String, Uuid)>() {

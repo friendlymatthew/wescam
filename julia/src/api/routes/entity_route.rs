@@ -1,11 +1,13 @@
+use crate::api::api_errors::handle_rejection;
+use crate::api::handlers::entity_handler::{
+    handle_create_rogue_user, handle_create_user, handle_get_rogue_by_email,
+    handle_get_user_by_guid,
+};
 use crate::scylladb::configs::prepared_queries::entity_queries::EntityQueries;
 use scylla::Session;
 use std::sync::Arc;
-use warp::Filter;
-use crate::api::api_errors::{handle_rejection};
 use uuid::Uuid;
-use crate::api::handlers::entity_handler::{handle_create_rogue_user, handle_create_user, handle_get_rogue_by_email, handle_get_user_by_guid};
-
+use warp::Filter;
 
 pub fn routes(
     session: Arc<Session>,
@@ -33,7 +35,6 @@ pub fn create_rogue_route(
         .and_then(handle_create_rogue_user)
 }
 
-
 pub fn create_user_route(
     session: Arc<Session>,
     prepared_queries: Arc<EntityQueries>,
@@ -45,7 +46,6 @@ pub fn create_user_route(
         .and(warp::body::json())
         .and_then(handle_create_user)
 }
-
 
 pub fn get_user_route(
     session: Arc<Session>,
@@ -73,8 +73,6 @@ pub fn get_rogue_route(
         })
 }
 
-
-
 fn with_prepared_queries(
     prepared_queries: Arc<EntityQueries>,
 ) -> impl Filter<Extract = (Arc<EntityQueries>,), Error = std::convert::Infallible> + Clone {
@@ -86,4 +84,3 @@ fn with_session(
 ) -> impl Filter<Extract = (Arc<Session>,), Error = std::convert::Infallible> + Clone {
     warp::any().map(move || session.clone())
 }
-

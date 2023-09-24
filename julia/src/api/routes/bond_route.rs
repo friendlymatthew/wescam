@@ -1,21 +1,24 @@
+use crate::api::api_errors::handle_rejection;
+use crate::api::handlers::bond_handler::{handle_create_bond, handle_get_bonds_by_user_guid};
 use crate::scylladb::configs::prepared_queries::bond_queries::BondQueries;
+use pulsar::{Pulsar, TokioExecutor};
 use scylla::Session;
 use std::sync::Arc;
-use pulsar::{Pulsar, TokioExecutor};
 use uuid::Uuid;
 use warp::Filter;
-use crate::api::api_errors::{handle_rejection};
-use crate::api::handlers::bond_handler::{handle_create_bond, handle_get_bonds_by_user_guid};
 
 // TODO: REFACTOR TO STRUCT
 
 pub fn routes(
     session: Arc<Session>,
     prepared_queries: Arc<BondQueries>,
-    pulsar_service: Arc<Pulsar<TokioExecutor>>
+    pulsar_service: Arc<Pulsar<TokioExecutor>>,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
-
-    let create_bond = create_bond_route(session.clone(), prepared_queries.clone(), pulsar_service.clone());
+    let create_bond = create_bond_route(
+        session.clone(),
+        prepared_queries.clone(),
+        pulsar_service.clone(),
+    );
     let get_user_bonds = get_bonds_by_user_guid_route(session.clone(), prepared_queries.clone());
 
     let all_route = create_bond.or(get_user_bonds);
@@ -25,7 +28,7 @@ pub fn routes(
 pub fn create_bond_route(
     session: Arc<Session>,
     prepared_queries: Arc<BondQueries>,
-    pulsar_service: Arc<Pulsar<TokioExecutor>>
+    pulsar_service: Arc<Pulsar<TokioExecutor>>,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     warp::path!("create_bond")
         .and(warp::post())
@@ -49,10 +52,10 @@ pub fn get_bonds_by_user_guid_route(
         })
 }
 
-
 fn with_producer(
     pulsar_service: Arc<Pulsar<TokioExecutor>>,
-) -> impl Filter<Extract = (Arc<Pulsar<TokioExecutor>>,), Error = std::convert::Infallible> + Clone {
+) -> impl Filter<Extract = (Arc<Pulsar<TokioExecutor>>,), Error = std::convert::Infallible> + Clone
+{
     warp::any().map(move || pulsar_service.clone())
 }
 
@@ -67,4 +70,3 @@ fn with_session(
 ) -> impl Filter<Extract = (Arc<Session>,), Error = std::convert::Infallible> + Clone {
     warp::any().map(move || session.clone())
 }
-

@@ -1,7 +1,7 @@
+use crate::scylladb;
+use scylladb::service::service_errors::Error;
 use warp::http::StatusCode;
 use warp::reject::Reject;
-use scylladb::service::service_errors::Error;
-use crate::scylladb;
 
 #[derive(Debug)]
 pub enum ApiError {
@@ -12,7 +12,7 @@ pub enum ApiError {
 
 impl Reject for ApiError {}
 
-pub fn map_error_to_api_error(error: Error) -> ApiError{
+pub fn map_error_to_api_error(error: Error) -> ApiError {
     match error {
         Error::DatabaseError(msg) => ApiError::NotFound,
         Error::NotFound => ApiError::NotFound,
