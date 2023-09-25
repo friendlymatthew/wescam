@@ -1,12 +1,14 @@
-use std::sync::Arc;
-use scylla::Session;
-use serde::Serialize;
-use uuid::Uuid;
-use warp::http::StatusCode;
 use crate::api::api_errors::map_error_to_api_error;
 use crate::scylladb::configs::prepared_queries::entity_queries::EntityQueries;
 use crate::scylladb::datatype::entity_type::{CreateRogueInput, CreateUserInput, Rogue, User};
-use crate::scylladb::service::entity::{create_rogue, create_user, get_rogue_by_email, get_user_by_guid};
+use crate::scylladb::service::entity::{
+    create_rogue, create_user, get_rogue_by_email, get_user_by_guid,
+};
+use scylla::Session;
+use serde::Serialize;
+use std::sync::Arc;
+use uuid::Uuid;
+use warp::http::StatusCode;
 
 #[derive(Serialize)]
 pub struct SingleRogueResponse {
@@ -44,7 +46,6 @@ pub async fn handle_create_user(
         }
     }
 }
-
 
 pub async fn handle_create_rogue_user(
     session: Arc<Session>,

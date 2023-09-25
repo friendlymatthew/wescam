@@ -1,14 +1,14 @@
-use crate::scylladb::datatype::bond_type::{Bond, CreateBondInput};
 use crate::scylladb::configs::prepared_queries::bond_queries::BondQueries;
-use chrono::{DateTime, Utc};
-use scylla::{IntoTypedRows, Session};
-use std::sync::Arc;
-use pulsar::{producer, Pulsar, TokioExecutor};
-use scylla::batch::Batch;
-use tracing::{warn};
-use uuid::Uuid;
+use crate::scylladb::datatype::bond_type::{Bond, CreateBondInput};
 use crate::scylladb::service::service_errors::Error;
 use crate::scylladb::service::tracing_utility::handle_tracing;
+use chrono::{DateTime, Utc};
+use pulsar::{producer, Pulsar, TokioExecutor};
+use scylla::batch::Batch;
+use scylla::{IntoTypedRows, Session};
+use std::sync::Arc;
+use tracing::warn;
+use uuid::Uuid;
 
 async fn check_existing_bond(
     session: Arc<Session>,
@@ -16,11 +16,7 @@ async fn check_existing_bond(
     creator_guid: Uuid,
     crush_guid: Uuid,
 ) -> Result<Option<Bond>, Error> {
-    let bond_guid = format!(
-        "{}{}",
-        crush_guid.to_string(),
-        creator_guid.to_string(),
-    );
+    let bond_guid = format!("{}{}", crush_guid.to_string(), creator_guid.to_string(),);
 
     let result = session
         .execute(&prepared_queries.check_existing_bond, (bond_guid,))
@@ -29,14 +25,17 @@ async fn check_existing_bond(
     if let Err(e) = handle_tracing(
         session.clone(),
         result.tracing_id,
-        format!("Check Existing Bond")
-    ).await {
+        format!("Check Existing Bond"),
+    )
+    .await
+    {
         warn!("Tracing failed to execute {:?}", e)
     }
 
     if let Some(rows) = result.rows {
         for row in rows.into_typed::<(String, Uuid, Uuid, i32, i32, String, String)>() {
-            let (guid, creator_guid, crush_guid, bond_type, game_status, created_at, updated_at) = row?;
+            let (guid, creator_guid, crush_guid, bond_type, game_status, created_at, updated_at) =
+                row?;
             return Ok(Some(Bond {
                 guid,
                 creator_guid,
@@ -80,36 +79,30 @@ pub async fn form_bond(
             .build()
             .await?;
 
-
         let mut batch: Batch = Batch::default();
 
         batch.append_statement(prepared_queries.update_bond.clone());
 
         &batch.set_tracing(true);
 
-        let batch_value =  (
-            (
-                1,
-                updated_at.to_string(),
-                existing_bond.guid.clone()
-            ),
-        );
+        let batch_value = ((1, updated_at.to_string(), existing_bond.guid.clone()),);
 
         let result = session.batch(&batch, batch_value).await?;
 
         if let Err(e) = handle_tracing(
             session.clone(),
             result.tracing_id,
-            format!("Form existing bond")
-        ).await {
+            format!("Form existing bond"),
+        )
+        .await
+        {
             warn!("Tracing failed to execute {:?}", e);
         }
 
         existing_bond.game_status = 1;
         existing_bond.updated_at = updated_at.to_string();
 
-        producer
-            .send(existing_bond.clone()).await?.await.unwrap();
+        // TODO! BETTER response payload producer.send(existing_bond.clone()).await?.await.unwrap();
 
         return_bond = existing_bond.clone();
     } else {
@@ -138,8 +131,10 @@ pub async fn form_bond(
         if let Err(e) = handle_tracing(
             session.clone(),
             result.tracing_id,
-            format!("Form unique bond")
-        ).await {
+            format!("Form unique bond"),
+        )
+        .await
+        {
             warn!("Tracing failed to execute {:?}", e);
         }
 
@@ -172,8 +167,10 @@ pub async fn get_bonds_by_user_guid(
     if let Err(e) = handle_tracing(
         session.clone(),
         creator_result.tracing_id,
-        format!("Get bonds by user guid")
-    ).await {
+        format!("Get bonds by user guid"),
+    )
+    .await
+    {
         warn!("Tracing failed to execute {:?}", e);
     }
 
@@ -181,7 +178,8 @@ pub async fn get_bonds_by_user_guid(
 
     if let Some(rows) = creator_result.rows {
         for row in rows.into_typed::<(String, Uuid, Uuid, i32, i32, String, String)>() {
-            let (guid, creator_guid, crush_guid, bond_type, game_status, created_at, updated_at) = row?;
+            let (guid, creator_guid, crush_guid, bond_type, game_status, created_at, updated_at) =
+                row?;
 
             let bond = Bond {
                 guid,
