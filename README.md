@@ -1,4 +1,4 @@
-## _xyz is an asynchronous chat and web service_
+## _wescam is a school tradition at Wesleyan where people sign up, play a guessing game, and say goodbye_
 
 
 ![arch.png](arch.png)
