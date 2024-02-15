@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+    html,
+    body {
+        @apply bg-[#EEBCC6] text-black;
+    }
+
+    html.dark,
+    body.dark {
+        @apply bg-[#EEBCC6] text-white;
+    }
+}
