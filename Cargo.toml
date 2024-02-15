@@ -1,6 +1,0 @@
-[workspace]
-members=[
-    "countdown"
-]
-
-resolver="2"
